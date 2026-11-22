@@ -42,7 +42,23 @@ Self-hosted in `public/fonts/`, Latin subset, `.woff2`. Each folder has its `OFL
 
 | Token | Value | Tailwind class | Use for |
 | --- | --- | --- | --- |
-| `--color-ink` | `#2e2e2e` | `text-ink`, `bg-ink`, `border-ink` | Default text color (set on `body`) |
+| `--color-ink` | `#2e2e2e` | `bg-ink`, `text-ink`, `border-ink` | Page background (set on `body`) |
 
 - Add new colors only as `--color-*` tokens in `@theme`, then list them here.
 - Do not use raw hex values in components.
+- Text color is not decided yet. Do not use `text-ink` for text on the page background (same color, invisible).
+
+## Pages
+
+Routes in `src/pages/`. Every page wraps its content in `src/layouts/Layout.astro`.
+
+| Page | File | URL |
+| --- | --- | --- |
+| Landing | `index.astro` | `/` |
+| Blog | `blog/index.astro` | `/blog` |
+| Blog post (dynamic) | `blog/[slug].astro` | `/blog/<slug>` |
+| Projects | `projects.astro` | `/projects` |
+| Favourites | `favourites.astro` | `/favourites` |
+| Work | `work.astro` | `/work` |
+
+All pages are empty for now: only the background color.
