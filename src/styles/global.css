@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* Fonts live in public/fonts. See design.md for usage rules. */
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter/inter-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gaegu";
+  src: url("/fonts/gaegu/gaegu-latin-300-normal.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gaegu";
+  src: url("/fonts/gaegu/gaegu-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gaegu";
+  src: url("/fonts/gaegu/gaegu-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Sono has two axes: wght (200-800) and MONO (0-1). The font-mono utility sets MONO to 1. */
+@font-face {
+  font-family: "Sono";
+  src: url("/fonts/sono/sono-latin-full-normal.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  /* Söhne is a paid font and is not stored in this repo. The browser uses it only if installed. */
+  --font-sans: "Söhne", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-heading: "Gaegu", ui-rounded, cursive;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Sono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-mono--font-variation-settings: "MONO" 1;
+
+  --color-ink: #2e2e2e;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+  }
+}
