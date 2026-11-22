@@ -82,10 +82,20 @@
   }
 }
 
-/* Dotted underline for emphasis and links in the summary. */
-.dotted {
+/* Dotted underline for emphasis and links. A utility, so hover:dotted and group-hover:dotted work. */
+@utility dotted {
   text-decoration-line: underline;
   text-decoration-style: dotted;
   text-decoration-thickness: 2px;
   text-underline-offset: 4px;
+}
+
+/* Icon links cannot be underlined, so a dotted line under the icon shows on hover. */
+@utility icon-link {
+  display: inline-block;
+  padding-bottom: 4px;
+  border-bottom: 2px dotted transparent;
+  &:hover {
+    border-bottom-color: currentColor;
+  }
 }

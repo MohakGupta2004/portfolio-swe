@@ -1,5 +1,5 @@
 ---
-import { githubIcon, globeIcon } from '../data/icons';
+import { FiGithub, FiGlobe } from 'react-icons/fi';
 
 // Facts come from the resume. Add a project by adding one object.
 const projects = [
@@ -20,7 +20,7 @@ const projects = [
 ];
 
 const chipClass =
-	'inline-flex items-center gap-1.5 rounded bg-foreground/10 px-2 py-1 text-xs text-foreground/60 hover:text-foreground';
+	'inline-flex items-center gap-1.5 rounded bg-foreground/10 px-2 py-1 text-xs text-foreground/60 hover:text-foreground hover:dotted';
 ---
 
 <section class="border-t border-dotted border-foreground/40 px-6 py-8">
@@ -36,20 +36,12 @@ const chipClass =
 							<img src={project.languageIcon} alt={project.language} title={project.language} class="size-4" />
 							{project.live && (
 								<a href={project.live} target="_blank" rel="noopener noreferrer" class={chipClass}>
-									<svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-										{globeIcon.map((path) => (
-											<path d={path} />
-										))}
-									</svg>
+									<FiGlobe class="size-3.5" />
 									live
 								</a>
 							)}
 							<a href={project.source} target="_blank" rel="noopener noreferrer" class={chipClass}>
-								<svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-									{githubIcon.map((path) => (
-										<path d={path} />
-									))}
-								</svg>
+								<FiGithub class="size-3.5" />
 								source
 							</a>
 						</div>

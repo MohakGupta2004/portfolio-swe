@@ -1,0 +1,26 @@
+---
+import { FiAward } from 'react-icons/fi';
+
+// From the old portfolio (portfolio-mdx) and the resume.
+const achievements = [
+	'Innovocon 2025 - 1st Place',
+	'Odoo x Adamas Hackathon - 1st Runner-up',
+	'Smart India Hackathon 2023 - Finalist',
+	'Murf AI Voice Agent Challenge - Completed',
+];
+---
+
+<section class="border-t border-dotted border-foreground/40 px-6 py-8">
+	<h2 class="font-heading text-2xl">Achievements</h2>
+
+	<ul class="mt-4 space-y-3">
+		{
+			achievements.map((name) => (
+				<li class="flex items-center justify-between gap-4 text-sm">
+					<span class="min-w-0 truncate">{name}</span>
+					<FiAward class="size-5 shrink-0 text-foreground/60" />
+				</li>
+			))
+		}
+	</ul>
+</section>

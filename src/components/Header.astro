@@ -38,7 +38,7 @@ function isActive(href: string) {
 						<a
 							href={link.href}
 							class:list={[
-								'font-heading text-xl underline-offset-4 hover:text-foreground',
+								'font-heading text-xl underline-offset-4 hover:text-foreground hover:underline hover:decoration-dotted',
 								isActive(link.href)
 									? 'text-foreground underline decoration-dotted'
 									: 'text-foreground/60',

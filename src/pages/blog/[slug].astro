@@ -1,9 +1,13 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 
-// Placeholder slug until real blog posts exist.
+// Hardcoded slugs until real blog posts are loaded.
 export function getStaticPaths() {
-	return [{ params: { slug: 'hello-world' } }];
+	return [
+		{ params: { slug: 'load-balancing-algorithms' } },
+		{ params: { slug: 'api-gateways' } },
+		{ params: { slug: 'monolithic-and-microservices' } },
+	];
 }
 ---
 
