@@ -1,0 +1,48 @@
+---
+const currentPath = Astro.url.pathname;
+
+const links = [
+	{ label: 'Home', href: '/' },
+	{ label: 'Blog', href: '/blog' },
+	{ label: 'Projects', href: '/projects' },
+	{ label: 'Work', href: '/work' },
+	{ label: 'Favourites', href: '/favourites' },
+	{ label: 'Resume', href: '/resume.pdf' },
+];
+
+function isActive(href: string) {
+	if (href === '/') return currentPath === '/';
+	return currentPath.startsWith(href);
+}
+---
+
+<header>
+	<div class="flex items-center gap-4 px-6 py-6">
+		<img src="/pfp.jpeg" alt="Mohak Gupta" class="size-12 rounded-lg object-cover" />
+		<p class="font-heading text-2xl">
+			Mohak Gupta <span class="text-paper/60">aka</span> <span class="italic">rushbeef04</span>
+		</p>
+	</div>
+
+	<nav class="border-t border-dotted border-paper/40 px-6 py-3">
+		<ul class="flex flex-wrap gap-x-6 gap-y-1">
+			{
+				links.map((link) => (
+					<li>
+						<a
+							href={link.href}
+							class:list={[
+								'font-heading text-xl underline-offset-4 hover:text-paper',
+								isActive(link.href)
+									? 'text-paper underline decoration-dotted'
+									: 'text-paper/60',
+							]}
+						>
+							{link.label}
+						</a>
+					</li>
+				))
+			}
+		</ul>
+	</nav>
+</header>

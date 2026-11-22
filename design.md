@@ -43,10 +43,11 @@ Self-hosted in `public/fonts/`, Latin subset, `.woff2`. Each folder has its `OFL
 | Token | Value | Tailwind class | Use for |
 | --- | --- | --- | --- |
 | `--color-ink` | `#2e2e2e` | `bg-ink`, `text-ink`, `border-ink` | Page background (set on `body`) |
+| `--color-paper` | `#ececec` | `text-paper`, `border-paper` | Text and lines on the ink background (default text color on `body`). Use opacity for muted text, e.g. `text-paper/60`. |
 
 - Add new colors only as `--color-*` tokens in `@theme`, then list them here.
 - Do not use raw hex values in components.
-- Text color is not decided yet. Do not use `text-ink` for text on the page background (same color, invisible).
+- Never use `text-ink` on the page background (same color, invisible).
 
 ## Pages
 
@@ -62,3 +63,11 @@ Routes in `src/pages/`. Every page wraps its content in `src/layouts/Layout.astr
 | Work | `work.astro` | `/work` |
 
 All pages are empty for now: only the background color.
+
+## Landing page layout
+
+- Content column: `max-w-xl`, centered, with dashed left and right borders (`border-x border-dashed border-paper/40`).
+- Header (`src/components/Header.astro`): profile picture (`public/pfp.jpeg`) + name in `font-heading`, then a dotted line, then the nav row.
+- Name format: "Mohak Gupta *aka* rushbeef04". "aka" is muted, handle is italic.
+- Nav: Home, Blog, Projects, Work, Favourites, Resume. `font-heading`. Active link is full `text-paper` with a dotted underline, others are `text-paper/60`.
+- Resume links to `/resume.pdf` (file not added yet).

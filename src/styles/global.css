@@ -52,11 +52,13 @@
   --font-mono--font-variation-settings: "MONO" 1;
 
   --color-ink: #2e2e2e;
+  --color-paper: #ececec;
 }
 
 @layer base {
   body {
     font-family: var(--font-sans);
     background-color: var(--color-ink);
+    color: var(--color-paper);
   }
 }
