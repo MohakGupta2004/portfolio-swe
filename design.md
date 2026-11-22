@@ -40,14 +40,17 @@ Self-hosted in `public/fonts/`, Latin subset, `.woff2`. Each folder has its `OFL
 
 ## Color
 
-| Token | Value | Tailwind class | Use for |
-| --- | --- | --- | --- |
-| `--color-ink` | `#2e2e2e` | `bg-ink`, `text-ink`, `border-ink` | Page background (set on `body`) |
-| `--color-paper` | `#ececec` | `text-paper`, `border-paper` | Text and lines on the ink background (default text color on `body`). Use opacity for muted text, e.g. `text-paper/60`. |
+Two themes. Dark is the default. The choice is saved in `localStorage` under `theme` and applied to `<html data-theme="light">` before paint (inline script in `Layout.astro`).
 
-- Add new colors only as `--color-*` tokens in `@theme`, then list them here.
-- Do not use raw hex values in components.
-- Never use `text-ink` on the page background (same color, invisible).
+| Token | Dark | Light | Tailwind class | Use for |
+| --- | --- | --- | --- | --- |
+| `--color-background` | `#2e2e2e` | `#f5f5f3` | `bg-background` | Page background (set on `body`) |
+| `--color-foreground` | `#ececec` | `#2e2e2e` | `text-foreground`, `border-foreground` | Text and lines (default text color on `body`) |
+
+- Use opacity for muted text and lines, e.g. `text-foreground/60`, `border-foreground/40`.
+- Add new colors only as CSS variables for both themes in `global.css`, then list them here.
+- Do not use raw hex values in components. Do not use `dark:` variants, the variables already switch.
+- Theme toggle: `src/components/ThemeSwitcher.astro`, a sun/moon button at the right of the nav row.
 
 ## Pages
 
@@ -66,8 +69,8 @@ All pages are empty for now: only the background color.
 
 ## Landing page layout
 
-- Content column: `max-w-xl`, centered, with dashed left and right borders (`border-x border-dashed border-paper/40`).
+- Content column: `max-w-xl`, centered, with dashed left and right borders (`border-x border-dashed border-foreground/40`).
 - Header (`src/components/Header.astro`): profile picture (`public/pfp.jpeg`) + name in `font-heading`, then a dotted line, then the nav row.
 - Name format: "Mohak Gupta *aka* rushbeef04". "aka" is muted, handle is italic.
-- Nav: Home, Blog, Projects, Work, Favourites, Resume. `font-heading`. Active link is full `text-paper` with a dotted underline, others are `text-paper/60`.
+- Nav: Home, Blog, Projects, Work, Favourites, Resume. `font-heading`. Active link is full `text-foreground` with a dotted underline, others are `text-foreground/60`.
 - Resume links to `/resume.pdf` (file not added yet).

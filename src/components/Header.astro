@@ -1,4 +1,6 @@
 ---
+import ThemeSwitcher from './ThemeSwitcher.astro';
+
 const currentPath = Astro.url.pathname;
 
 const links = [
@@ -20,11 +22,11 @@ function isActive(href: string) {
 	<div class="flex items-center gap-4 px-6 py-6">
 		<img src="/pfp.jpeg" alt="Mohak Gupta" class="size-12 rounded-lg object-cover" />
 		<p class="font-heading text-2xl">
-			Mohak Gupta <span class="text-paper/60">aka</span> <span class="italic">rushbeef04</span>
+			Mohak Gupta <span class="text-foreground/60">aka</span> <span class="italic">rushbeef04</span>
 		</p>
 	</div>
 
-	<nav class="border-t border-dotted border-paper/40 px-6 py-3">
+	<nav class="flex items-center justify-between border-t border-dotted border-foreground/40 px-6 py-3">
 		<ul class="flex flex-wrap gap-x-6 gap-y-1">
 			{
 				links.map((link) => (
@@ -32,10 +34,10 @@ function isActive(href: string) {
 						<a
 							href={link.href}
 							class:list={[
-								'font-heading text-xl underline-offset-4 hover:text-paper',
+								'font-heading text-xl underline-offset-4 hover:text-foreground',
 								isActive(link.href)
-									? 'text-paper underline decoration-dotted'
-									: 'text-paper/60',
+									? 'text-foreground underline decoration-dotted'
+									: 'text-foreground/60',
 							]}
 						>
 							{link.label}
@@ -44,5 +46,6 @@ function isActive(href: string) {
 				))
 			}
 		</ul>
+		<ThemeSwitcher />
 	</nav>
 </header>
