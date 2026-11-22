@@ -2,15 +2,25 @@
 import Summary from '../components/Summary.astro';
 import Work from '../components/Work.astro';
 import Projects from '../components/Projects.astro';
+import Blogs from '../components/Blogs.astro';
+import Achievements from '../components/Achievements.astro';
+import Personal from '../components/Personal.astro';
+import WorkWithMe from '../components/WorkWithMe.astro';
+import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-	<main class="mx-auto min-h-screen max-w-xl border-x border-dashed border-foreground/40">
+	<main class="mx-auto min-h-screen max-w-2xl border-x border-dashed border-foreground/40">
 		<Header />
 		<Summary />
 		<Work />
 		<Projects />
+		<Blogs />
+		<Achievements />
+		<Personal />
+		<WorkWithMe />
+		<Footer />
 	</main>
 </Layout>

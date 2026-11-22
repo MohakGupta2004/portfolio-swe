@@ -1,0 +1,21 @@
+---
+const items = [
+	{ name: 'books', about: 'my collection of books' },
+	{ name: 'movies', about: 'my collection of movies' },
+];
+---
+
+<section class="border-t border-dotted border-foreground/40 px-6 py-8">
+	<h2 class="font-heading text-2xl">Personal</h2>
+
+	<div class="mt-4 space-y-2">
+		{
+			items.map((item) => (
+				<a href="/favourites" class="group block truncate font-heading text-xl">
+					<span class="group-hover:dotted">{item.name}</span>
+					<span class="text-foreground/60"> / {item.about}</span>
+				</a>
+			))
+		}
+	</div>
+</section>
