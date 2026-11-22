@@ -1,0 +1,24 @@
+---
+// One role only. Facts come from the resume.
+const job = {
+	name: 'Valstrand Solutions',
+	role: 'Software Engineer',
+	logo: '/valstrand.webp',
+	about: 'I work across cloud, frontend and backend, and design the systems end to end.',
+};
+---
+
+<section class="border-t border-dotted border-foreground/40 px-6 py-8">
+	<h2 class="font-heading text-2xl">Work</h2>
+
+	<div class="mt-4 flex items-start gap-3">
+		<img src={job.logo} alt="" class="size-9 shrink-0 rounded-full object-cover" />
+		<p class="pt-1.5 text-sm leading-snug">
+			<span class="font-semibold">{job.name} ({job.role})</span>
+			<span class="text-foreground/40"> / </span>
+			<span class="text-foreground/60">{job.about}</span>
+		</p>
+	</div>
+
+	<a href="/work" class="dotted mt-6 inline-block text-sm text-foreground/60 hover:text-foreground">view all work →</a>
+</section>

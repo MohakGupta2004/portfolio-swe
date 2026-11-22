@@ -1,5 +1,6 @@
 ---
 import ThemeSwitcher from './ThemeSwitcher.astro';
+import SocialLinks from './SocialLinks.astro';
 
 const currentPath = Astro.url.pathname;
 
@@ -19,11 +20,14 @@ function isActive(href: string) {
 ---
 
 <header>
-	<div class="flex items-center gap-4 px-6 py-6">
+	<div class="flex flex-wrap items-center gap-4 px-6 py-6">
 		<img src="/pfp.jpeg" alt="Mohak Gupta" class="size-12 rounded-lg object-cover" />
 		<p class="font-heading text-2xl">
 			Mohak Gupta <span class="text-foreground/60">aka</span> <span class="italic">rushbeef04</span>
 		</p>
+		<div class="ml-auto">
+			<SocialLinks />
+		</div>
 	</div>
 
 	<nav class="flex items-center justify-between border-t border-dotted border-foreground/40 px-6 py-3">

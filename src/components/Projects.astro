@@ -1,0 +1,64 @@
+---
+import { githubIcon, globeIcon } from '../data/icons';
+
+// Facts come from the resume. Add a project by adding one object.
+const projects = [
+	{
+		name: 'mredis',
+		about: 'A Redis-compatible server in Go that works with redis-cli.',
+		source: 'https://github.com/MohakGupta2004/mredis',
+		language: 'Go',
+		languageIcon: '/icons/go.svg',
+	},
+	{
+		name: 'mcode',
+		about: 'A terminal coding assistant in C++, like Claude Code.',
+		source: 'https://github.com/MohakGupta2004/mcode',
+		language: 'C++',
+		languageIcon: '/icons/cpp.svg',
+	},
+];
+
+const chipClass =
+	'inline-flex items-center gap-1.5 rounded bg-foreground/10 px-2 py-1 text-xs text-foreground/60 hover:text-foreground';
+---
+
+<section class="border-t border-dotted border-foreground/40 px-6 py-8">
+	<h2 class="font-heading text-2xl">Projects</h2>
+
+	<div class="mt-4 space-y-5">
+		{
+			projects.map((project) => (
+				<div>
+					<div class="flex flex-wrap items-center justify-between gap-2">
+						<p class="text-sm">{project.name}</p>
+						<div class="flex items-center gap-2">
+							<img src={project.languageIcon} alt={project.language} title={project.language} class="size-4" />
+							{project.live && (
+								<a href={project.live} target="_blank" rel="noopener noreferrer" class={chipClass}>
+									<svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+										{globeIcon.map((path) => (
+											<path d={path} />
+										))}
+									</svg>
+									live
+								</a>
+							)}
+							<a href={project.source} target="_blank" rel="noopener noreferrer" class={chipClass}>
+								<svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+									{githubIcon.map((path) => (
+										<path d={path} />
+									))}
+								</svg>
+								source
+							</a>
+						</div>
+					</div>
+					<p class="mt-1 text-sm leading-snug text-foreground/60">{project.about}</p>
+				</div>
+			))
+		}
+	</div>
+
+	<a href="/projects" class="dotted mt-6 inline-block text-sm text-foreground/60 hover:text-foreground">view all projects →</a>
+</section>
