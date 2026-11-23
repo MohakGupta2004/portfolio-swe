@@ -77,9 +77,9 @@ Pages that are not built yet are empty: only the background color.
 - Header (`src/components/Header.astro`): profile picture (`public/pfp.jpeg`) + name in `font-heading`, then a dotted line, then the nav row.
 - Profile picture and name are one link to `/`. Hovering either tilts the picture 6deg (`group-hover:-rotate-6`, 200ms, motion-safe only).
 - Name format: "Mohak Gupta *aka* rushbeef04". "aka" is muted, handle is italic.
-- Social icons (`src/components/SocialLinks.astro`): top right of the name row, inside the content column only. GitHub, LinkedIn, Email, Download resume. Round-stroke line icons (1.75 stroke, round caps and joins) to match Gaegu. Muted `text-foreground/60`, full on hover. Social links open in a new tab. The resume icon downloads `/resume.pdf` (file not added yet).
+- Social icons (`src/components/SocialLinks.astro`): top right of the name row, inside the content column only. GitHub, LinkedIn, Email, Download resume. Round-stroke line icons (1.75 stroke, round caps and joins) to match Gaegu. Muted `text-foreground/60`, full on hover. Social links open in a new tab. The resume icon downloads `/resume.pdf`.
 - Nav: Home, Blog, Projects, Work, Favourites, Resume. `font-heading`. Active link is full `text-foreground` with a dotted underline, others are `text-foreground/60`.
-- Resume links to `/resume.pdf` (file not added yet).
+- Resume links to `/resume.pdf`. The file is `public/resume.pdf`, a copy of `~/Documents/resume/resume_general_swe.pdf`. Replace it when the resume changes.
 
 ## Summary section
 
