@@ -1,22 +1,9 @@
 ---
-// Hardcoded for now. Slugs match the file names in portfolio-mdx/blog.
-const blogs = [
-	{
-		title: 'Load Balancing, Explained Like Managing a Restaurant',
-		date: '23.MAR.2026',
-		slug: 'load-balancing-algorithms',
-	},
-	{
-		title: 'Understanding API Gateways',
-		date: '06.MAR.2026',
-		slug: 'api-gateways',
-	},
-	{
-		title: 'Monolithic vs Microservices',
-		date: '23.FEB.2026',
-		slug: 'monolithic-and-microservices',
-	},
-];
+import { getBlogs } from '../data/blogs';
+
+// Only the 3 newest blogs on the landing page.
+const blogs = await getBlogs();
+const newestBlogs = blogs.slice(0, 3);
 ---
 
 <section class="border-t border-dotted border-foreground/40 px-6 py-8">
@@ -24,7 +11,7 @@ const blogs = [
 
 	<div class="mt-4 space-y-3">
 		{
-			blogs.map((blog) => (
+			newestBlogs.map((blog) => (
 				<a href={`/blog/${blog.slug}`} class="group flex items-baseline justify-between gap-4 text-sm">
 					<span class="group-hover:dotted min-w-0 truncate">{blog.title}</span>
 					<span class="font-mono shrink-0 text-xs text-foreground/60">{blog.date}</span>

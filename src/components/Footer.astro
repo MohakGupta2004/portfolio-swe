@@ -1,28 +1,5 @@
----
-import { FiGithub, FiLinkedin, FiTwitter } from 'react-icons/fi';
-
-// Copied from the old portfolio.
-const links = [
-	{ label: 'GitHub', href: 'https://github.com/MohakGupta2004', Icon: FiGithub },
-	{ label: 'Twitter', href: 'https://twitter.com/rushbeef04', Icon: FiTwitter },
-	{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/mohak-gupta-007065294', Icon: FiLinkedin },
-];
----
-
 <footer class="flex flex-wrap items-center justify-between gap-4 border-t border-dashed border-foreground/40 px-6 py-6 text-sm">
 	<p><span class="text-foreground/60">~</span> @rushbeef04</p>
-
-	<ul class="flex items-center gap-3">
-		{
-			links.map((link) => (
-				<li>
-					<a href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.label} class="icon-link text-foreground/60 hover:text-foreground">
-						<link.Icon class="size-4" />
-					</a>
-				</li>
-			))
-		}
-	</ul>
 
 	<p class="text-xs text-foreground/60">Built with <span class="text-foreground">passion</span>, assembled in India</p>
 </footer>

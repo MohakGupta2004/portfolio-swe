@@ -1,0 +1,124 @@
+---
+title: 'API Gateways: The Unsung Heroes of Microservices'
+description: 'What an API gateway does: routing, composition, authentication, service discovery, load balancing and scaling across regions.'
+date: '2026-03-11'
+thumbnail: '/images/blogs/api-gateways.jpg'
+---
+
+Many modern apps are built from small services instead of one big program. A User service manages accounts, an Order service manages orders and a Payment service handles payments. Once you have several of them, you need something to manage how requests reach them. That something is usually an API gateway, backed by a few related pieces: API composition, service discovery and load balancers. This post walks through each.
+
+## What an API gateway does
+
+Think of walking into a hospital. You don't know where the lab, the pharmacy or billing is, so you go to the reception desk and say what you need. The receptionist sends you to the right place.
+
+An API gateway does that for your services. Every request hits the gateway first, and the gateway forwards it:
+
+- Login requests go to the User service.
+- Order requests go to the Order service.
+- Payment requests go to the Payment service.
+
+![API gateway routing requests to services](/images/posts/api-gateways/what-is-api-gateway.png)
+
+## API composition
+
+Some requests need data from several services. Placing an order might mean checking the user, creating the order and processing the payment. If the client had to call each service itself, the client would carry all that logic.
+
+With composition, the client sends one request. The gateway calls the services, combines their answers and returns one response.
+
+![combining data from multiple services](/images/posts/api-gateways/api-composition.png)
+
+### Sequential composition
+
+The gateway calls services one after another: check the user, create the order, process the payment. Each step waits for the one before it.
+
+- Good: it is easy to follow, and it works when one call depends on the result of another.
+- Bad: it is slow, because the waits add up.
+
+### Parallel composition
+
+The gateway calls several services at once, for example the user profile, the order history and product recommendations.
+
+- Good: responses usually come back faster.
+- Bad: error handling gets harder. If one call fails, you have to decide what to do with the others, and debugging takes longer.
+
+### Why it helps
+
+- The client sends one request and not many.
+- Frontend code gets simpler.
+- The gateway can shape responses per device. A phone can get less data and a desktop can get more.
+
+![client calling several services directly](/images/posts/api-gateways/client-calling.png)
+
+![client calling through the gateway](/images/posts/api-gateways/client-calling-api-gateway.png)
+
+### What it costs
+
+- If one service is slow, the whole response is slow.
+- If one service is down, the gateway may not be able to build the final answer.
+- The gateway now carries more responsibility, and every service it depends on has to be up at the same time.
+
+## Authentication
+
+The gateway is also a good place to check who is calling. Before it forwards anything, it asks an authentication service whether the user is allowed in.
+
+```text
+Client → API gateway → Authentication service
+Authenticated     → request goes on to the services
+Not authenticated → request is rejected
+```
+
+Checking in one place means each service doesn't have to repeat the same logic.
+
+![gateway authenticating users before forwarding](/images/posts/api-gateways/auth.png)
+
+## Service discovery
+
+Services start, stop and move between servers. The gateway has to know where each one is right now. Service discovery keeps that record: which services are running, which are down and where each one lives.
+
+```text
+Client → API gateway
+API gateway → asks service discovery
+Service discovery → returns the service's location
+API gateway → sends the request there
+```
+
+This stops the gateway from sending requests to services that are not available.
+
+![finding services with service discovery](/images/posts/api-gateways/service-discovery.png)
+
+## Load balancers
+
+After the gateway picks a service, a second question comes up: which server runs it? In large systems a service runs on many servers. A load balancer spreads requests across them so none gets overloaded.
+
+```text
+Client → API gateway
+API gateway → picks the service
+Load balancer → picks one server
+Request → that server
+```
+
+The gateway decides which service handles a request. The load balancer decides which server.
+
+![spreading requests across servers](/images/posts/api-gateways/load-balancer.png)
+
+## Scaling the gateway
+
+Is there only one gateway? In a small system, yes. As traffic grows, one gateway is not enough, so large systems split into regions and use DNS to choose between them.
+
+Each region, say New York and California, has its own copy of the full stack: gateway, authentication service, service discovery, load balancer and services. Each region can handle traffic on its own.
+
+To choose a region, DNS points a name like `api.domain.com` at several IP addresses, one per region. A request lands on one of them, and that spreads traffic across the gateways.
+
+The full path of a request looks like this:
+
+1. DNS picks a region.
+2. The request reaches that region's gateway.
+3. The gateway checks authentication and routes the request.
+4. The load balancer picks a server.
+5. The request reaches the right service.
+
+![scaling gateways with DNS and regions](/images/posts/api-gateways/how-api-gateway-scals.png)
+
+## Summary
+
+The gateway is the front door of a microservice system. With composition, authentication, service discovery, load balancing and regional scaling behind it, an app can serve many users and stay organized.

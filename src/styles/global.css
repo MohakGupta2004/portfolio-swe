@@ -75,6 +75,15 @@
 }
 
 @layer base {
+  /* Hide the scrollbar on every page. Scrolling still works, and nothing shifts between pages. */
+  html {
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar {
+    display: none;
+  }
+
   body {
     font-family: var(--font-sans);
     background-color: var(--color-background);

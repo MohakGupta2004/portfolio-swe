@@ -1,0 +1,103 @@
+---
+title: 'Monolith to Microservices'
+description: 'What running a monolith with queues and workers taught me about microservices, canary deploys, the strangler pattern and sagas.'
+date: '2026-03-02'
+thumbnail: '/images/blogs/monolithic-and-microservices.jpg'
+---
+
+I had wanted to study high-level design properly for a long time. I knew the textbook difference between a monolith and microservices, but it never stuck. Then I started reading seriously, and my day job gave me something to connect it to.
+
+At work, most of our backend is a monolith: one server, one deployment, everything together. That worked fine for a long while.
+
+## Life inside a monolith
+
+Our code keeps the APIs, the business logic and the database access in one place, and it ships as one unit.
+
+![monolith](/images/posts/monolithic-and-microservices/monolithic.png)
+
+That is easy to follow and easy to deploy. It got harder when we added asynchronous work: queues, background workers and long-running jobs. The app was still a monolith, but I now had three pieces to keep apart:
+
+- The API layer
+- The worker processes
+- The queue
+
+I was no longer thinking about one application. I was thinking about how those pieces coordinate.
+
+## Distributed questions show up early
+
+Once you have queues and workers, you start asking questions that belong to distributed systems:
+
+- What happens if a task fails?
+- What if a job runs twice?
+- What if one service is slow?
+- What if one step succeeds and the next one fails?
+
+None of these need microservices. They need only a second process. This is where HLD stopped being theory for me.
+
+## Monolith vs microservices
+
+A monolith is one deployable unit. It is simple and everything sits together.
+
+Microservices split the system into independent services. Each one owns its data, deploys on its own and talks to the others over the network.
+
+![microservices](/images/posts/monolithic-and-microservices/microservices.png)
+
+The real difference is not how the code is arranged. It is how much you have to operate.
+
+## Canary deployments
+
+Once a system grows, how you deploy matters as much as what you deploy. Canary caught my attention because it is practical.
+
+You do not send the new version to everyone. Most traffic stays on the old version and a small share goes to the new one. If the new version looks healthy, you raise its share a bit at a time. If it breaks, few users saw it.
+
+![canary deployment](/images/posts/monolithic-and-microservices/canary.png)
+
+## The strangler pattern
+
+Rewriting a whole monolith in one go is risky. The strangler pattern avoids it:
+
+1. Keep the monolith running.
+2. Pull one feature out into a new service.
+3. Route that feature's traffic to the new service.
+4. Repeat.
+
+The monolith shrinks over time until little or nothing is left.
+
+![strangler pattern](/images/posts/monolithic-and-microservices/strangler-fig.png)
+
+## Consistency without a shared database
+
+This changed my thinking the most. In a monolith, when something fails you roll back the database transaction.
+
+With microservices, each service owns its database. Say an order is created and then the payment fails. The order exists, the payment doesn't, and no transaction spans both services to undo it.
+
+![saga failure scenario](/images/posts/monolithic-and-microservices/problem-saga.png)
+
+The saga pattern handles this. It comes in two forms.
+
+### Saga with events (choreography)
+
+Services react to events and nobody is in charge.
+
+1. The Order service creates an order and emits an event.
+2. The Payment service hears it and takes the payment.
+3. If the payment fails, it emits a failure event.
+4. The Order service hears that and cancels the order.
+
+![saga with kafka](/images/posts/monolithic-and-microservices/solution-kafka-saga.png)
+
+There is no central controller, but following one flow across services gets hard.
+
+### Saga with an orchestrator
+
+A controller runs the steps. It calls the Order service, then the Payment service, and cancels the order if the payment fails.
+
+![saga with an orchestrator](/images/posts/monolithic-and-microservices/solution-orchestrator-saga.png)
+
+The flow is easier to read in one place, but everything now depends on the orchestrator.
+
+## What changed for me
+
+These patterns felt abstract until I ran queues and workers inside a monolith. Then I saw why they exist. Microservices are not only about splitting code. They deal with independent failures, state spread across services, partial success, safe deploys and gradual change.
+
+I still work mostly on a monolith. But knowing sagas, the strangler pattern and canary releases has changed where I draw boundaries. System design is no longer interview prep for me. It is how I think about real production problems.

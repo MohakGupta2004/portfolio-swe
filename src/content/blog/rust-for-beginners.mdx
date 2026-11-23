@@ -1,0 +1,417 @@
+---
+title: 'Rust for Beginners'
+description: 'The parts of Rust that confused me first: mutability, strings, ownership and borrowing, with small examples.'
+date: '2026-04-19'
+thumbnail: '/images/blogs/rust-for-beginners.jpg'
+---
+
+I started Rust because I wanted to read Solana programs without guessing what the syntax meant. I write C++ and JavaScript, so I expected an easy week. The compiler told me no a lot.
+
+This post covers the things that tripped me up, in the order they tripped me. Every example is small enough to paste into a file and run.
+
+## Install
+
+Rust ships with `rustup`, which installs the compiler and `cargo`, the build tool.
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+Then `cargo new hello` gives you a project and `cargo run` builds and runs it.
+
+## Variables are locked by default
+
+Assign a value with `let` and you cannot change it.
+
+```rust
+let x = 5;
+x = 10; // error: cannot assign twice to immutable variable
+```
+
+Add `mut` when you want to change it.
+
+```rust
+let mut y = 5;
+y = 10; // fine
+```
+
+This annoyed me for about a day. Then I noticed that when a variable has no `mut`, I never have to scan the function to see who changed it. Most of my bugs in other languages come from a value changing somewhere I did not look.
+
+## Data types
+
+Rust splits types into two groups.
+
+**Scalar types** hold one value:
+
+- Integers: `i32`, `u64`, and so on. The `i` is signed, the `u` is unsigned, the number is the bit width.
+- Floats: `f32`, `f64`
+- `bool`
+- `char`, one Unicode character
+- `&str`, a reference to text
+
+**Compound types** hold several values:
+
+- Array: fixed length, one type
+- Tuple: fixed length, mixed types
+- `String`: text that can grow
+- `Vec`: a list that can grow
+
+```rust
+let age: i32 = 25;
+let pi: f64 = 3.14;
+let is_valid: bool = true;
+let ch: char = 'A';
+let msg: &str = "Hello";
+
+let arr = [1, 2, 3];
+let tup = (1, 2.5, true);
+let s = String::from("hello");
+
+let mut v = vec![1, 2, 3];
+v.push(4);
+```
+
+## `&str` and `String`
+
+Two string types is the first thing that surprises people from JavaScript.
+
+A `&str` points at text that already lives somewhere else, usually inside your compiled binary. It is read-only and cannot grow.
+
+```rust
+let s1 = "hello";
+```
+
+A `String` owns its text on the heap. You can push onto it.
+
+```rust
+let mut s2 = String::from("hello");
+s2.push_str(" world");
+```
+
+My rule: if the function only reads the text, take `&str`. If it needs to keep or change the text, take `String`.
+
+![str vs string](/images/posts/rust-for-beginners/str-vs-string.png)
+
+## Tuples
+
+A tuple bundles values of different types without making a struct.
+
+```rust
+let person = (25, "Alice", true);
+
+println!("{}", person.0);          // 25
+
+let (age, name, active) = person;  // unpack all three
+println!("{} is {}", name, age);
+```
+
+I use them when a function needs to return two things and a named type feels like too much.
+
+## Functions
+
+The last expression in a function is its return value, so you leave off `return` and the semicolon.
+
+```rust
+fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+```
+
+The semicolon matters. Adding one turns the expression into a statement, and the function returns nothing.
+
+```rust
+fn wrong(a: i32, b: i32) -> i32 {
+    a + b; // error: expected i32, found ()
+}
+```
+
+You can still write `return a + b;` and it works. Most Rust code skips it unless it returns early.
+
+## Shadowing
+
+You can declare a new variable with the same name. The old one is gone from that point on.
+
+```rust
+let x = 5;
+let x = x + 1;
+let x = "now a string";
+```
+
+This is different from `mut`. A `mut` variable keeps its type. A shadowed one is a new variable, so the type can change. I use this for parsing:
+
+```rust
+let x = "42";
+let x: i32 = x.parse().unwrap();
+```
+
+| | `mut` | Shadowing |
+|---|---|---|
+| Change the value | Yes | Yes |
+| Change the type | No | Yes |
+| New variable | No | Yes |
+
+## Ownership
+
+Ownership is the idea that makes Rust different. There is no garbage collector and no manual `free`. The compiler tracks who owns each value and inserts the cleanup for you.
+
+Three rules:
+
+1. Every value has one owner.
+2. There can only be one owner at a time.
+3. When the owner goes out of scope, the value is dropped.
+
+![ownership diagram](/images/posts/rust-for-beginners/trpl04-01.svg)
+
+```rust
+{
+    let s = String::from("hello");
+} // s goes out of scope here, and its memory is freed
+```
+
+### Move
+
+Assigning a heap value to a second variable moves it. The first variable stops working.
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1;
+
+println!("{}", s1); // error: value borrowed after move
+```
+
+If both `s1` and `s2` stayed valid, both would free the same memory when they went out of scope. That is a double free, a classic C bug. Rust avoids it by invalidating `s1`.
+
+### Copy
+
+Small fixed-size types live on the stack and are cheap to duplicate, so assignment copies them.
+
+```rust
+let x = 5;
+let y = x; // both still work
+```
+
+Integers, floats, `bool` and `char` all behave this way.
+
+### Functions take ownership too
+
+Passing a `String` into a function moves it, same as assignment.
+
+```rust
+fn take_ownership(s: String) {
+    println!("{}", s);
+}
+
+let my_str = String::from("hello");
+take_ownership(my_str);
+
+println!("{}", my_str); // error: my_str was moved
+```
+
+You can hand it back through the return value, but threading every value in and out of every function gets old fast. Borrowing fixes that.
+
+## Borrowing
+
+A reference lets a function use a value without owning it. You make one with `&`.
+
+```rust
+fn print_value(s: &String) {
+    println!("{}", s);
+}
+
+let my_str = String::from("hello");
+print_value(&my_str);
+
+println!("{}", my_str); // still valid
+```
+
+The function borrowed `my_str` for the length of the call. Ownership never left.
+
+To change the value through a reference, you need `&mut`, and the original variable has to be `mut` as well.
+
+```rust
+fn change(s: &mut String) {
+    s.push_str(" world");
+}
+
+let mut my_str = String::from("hello");
+change(&mut my_str);
+```
+
+### The borrowing rules
+
+The compiler enforces these, and they are where most of my errors came from.
+
+You can have any number of shared references at once:
+
+```rust
+let s = String::from("hello");
+let r1 = &s;
+let r2 = &s;
+println!("{} {}", r1, r2);
+```
+
+You can have only one mutable reference at a time:
+
+```rust
+let mut s = String::from("hello");
+let r1 = &mut s;
+let r2 = &mut s; // error: second mutable borrow
+```
+
+You cannot mix the two while both are in use:
+
+```rust
+let mut s = String::from("hello");
+let r1 = &s;
+let r2 = &mut s; // error: mutable borrow while r1 is alive
+```
+
+The point of all three is to rule out data races. If one piece of code is reading while another is writing, you have a bug. Rust refuses to compile that program.
+
+### Dereferencing
+
+To write through a mutable reference, put `*` in front of it.
+
+```rust
+let mut x = 5;
+let y = &mut x;
+
+*y = 10;
+println!("{}", x); // 10
+```
+
+`y` is the reference. `*y` is the value it points to.
+
+## Dangling references
+
+In C you can return a pointer to a local variable. The function ends, the variable dies, and the pointer now aims at freed memory. Rust will not compile the same mistake.
+
+```rust
+fn dangle() -> &String { // error: missing lifetime specifier
+    let s = String::from("hello");
+    &s
+}
+```
+
+`s` is dropped when the function returns, so the reference would point at nothing. The fix is to return the `String` itself and let ownership move out.
+
+```rust
+fn no_dangle() -> String {
+    let s = String::from("hello");
+    s
+}
+```
+
+## Arrays and vectors
+
+An array has a size fixed at compile time and lives on the stack.
+
+```rust
+let arr: [i32; 4] = [10, 20, 30, 40];
+println!("{}", arr[0]);
+```
+
+A `Vec` lives on the heap and can grow and shrink.
+
+```rust
+let mut v: Vec<i32> = vec![10, 20, 30];
+v.push(40);
+v.pop();
+```
+
+If you know the length up front, use an array. Otherwise use a `Vec`. I reach for `Vec` most of the time.
+
+## More on scalar types
+
+Integers come in signed and unsigned sizes.
+
+```rust
+let a: i32 = -10;
+let b: u32 = 10;
+```
+
+Floats are `f32` or `f64`. A `char` is a Unicode scalar value, not a single byte, so it can hold an emoji.
+
+```rust
+let x: f64 = 2.718;
+let ch: char = 'A';
+let crab: char = '🦀';
+```
+
+## Loops and `match`
+
+Rust has three loops.
+
+```rust
+loop {
+    println!("running");
+    break; // loop runs forever until you break
+}
+
+let mut n = 0;
+while n < 5 {
+    n += 1;
+}
+
+for i in 0..5 {
+    println!("{}", i);
+}
+```
+
+To loop over a collection without consuming it, borrow it:
+
+```rust
+let nums = vec![10, 20, 30];
+for n in &nums {
+    println!("{}", n);
+}
+```
+
+`match` is a switch that checks you covered every case. It also returns a value.
+
+```rust
+let score = 85;
+
+let grade = match score {
+    90..=100 => "A",
+    80..=89 => "B",
+    70..=79 => "C",
+    _ => "F",
+};
+```
+
+If you leave out the `_` arm, the compiler tells you which values you missed. Nothing falls through to the next arm like it does in C.
+
+## Passing by value and by reference
+
+Most of the ownership rules above come down to this choice every time you call a function.
+
+Pass by value and the function gets its own copy, or takes ownership if the type is not `Copy`.
+
+```rust
+fn double(x: i32) -> i32 {
+    x * 2
+}
+
+let a = 5;
+let b = double(a);
+println!("{}", a); // a is still usable, i32 is Copy
+```
+
+Pass a reference and the function borrows.
+
+```rust
+fn print_len(s: &String) {
+    println!("{}", s.len());
+}
+
+let name = String::from("Alice");
+print_len(&name);
+println!("{}", name); // name was only borrowed
+```
+
+## Where this leaves you
+
+The compiler will reject a lot of your early code. Read the error. Rust's messages usually name the line, say what went wrong and often suggest the fix.
+
+Once ownership and borrowing click, the rest of the language gets easier, because most of it is built on those two ideas. I still fight the borrow checker, but now I know which rule it is pointing at.

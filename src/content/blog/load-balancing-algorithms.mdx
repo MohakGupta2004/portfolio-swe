@@ -1,0 +1,124 @@
+---
+title: 'Load Balancing Algorithms'
+description: 'L4 vs L7 load balancers and six algorithms for picking a server, from round robin to least response time.'
+date: '2026-03-18'
+thumbnail: '/images/blogs/load-balancing-algorithms.jpg'
+---
+
+One server stops being enough once an app grows, so you run several copies of the same service. That raises a question: which copy handles the next request?
+
+A load balancer answers it. Picture a restaurant manager seating customers across tables so no waiter ends up with the whole room.
+
+![load balancer](/images/posts/load-balancing-algorithms/load-balancer.png)
+
+## L4 and L7 load balancers
+
+The two types differ in how much of a request they read.
+
+### L4, the transport layer
+
+An L4 balancer works on connections. It looks at the IP address and port, runs over TCP or UDP, and never opens the request. It is the guard who checks your ID and waves you through without asking why you came.
+
+### L7, the application layer
+
+An L7 balancer works on requests. It understands HTTP, HTTPS and WebSockets, and it can read headers, cookies, paths and the body. It routes on what it finds, like a receptionist who asks your business and sends you to the right department.
+
+## L4 modes
+
+**Passthrough** keeps the TCP connection intact and forwards packets to the backend. The client believes it talks straight to the server.
+
+```text
+Client → LB → Server
+Server → LB → Client
+```
+
+Pick it when speed matters more than control.
+
+**Proxy mode** ends the client's connection at the balancer and opens a new one to the backend. The balancer talks to each side separately, like a middleman. That costs some speed but lets you log, filter and apply security rules.
+
+## Algorithms
+
+An algorithm is the rule the balancer uses to pick a server. Static ones follow fixed rules. Dynamic ones look at what the servers are doing right now.
+
+### 1. Round robin
+
+Requests go to servers in order, then start over.
+
+```text
+Request 1 → A
+Request 2 → B
+Request 3 → C
+Request 4 → A
+```
+
+It works for simple setups where every server is equal. It ignores capacity and current load, so a slow server gets the same share as a fast one.
+
+![round robin](/images/posts/load-balancing-algorithms/round-robin.png)
+
+### 2. Weighted round robin
+
+Each server gets a weight that matches its capacity. With A at weight 3 and B at weight 1, the order is:
+
+```text
+A → A → A → B → repeat
+```
+
+Use it when your servers differ in power. It still ignores the work itself, so a heavy request can land on the weaker server.
+
+![weighted round robin](/images/posts/load-balancing-algorithms/weighted-round-robin.png)
+
+### 3. IP hash
+
+The balancer hashes the client's IP address and maps it to a server.
+
+```text
+User IP → hash → server
+Same IP → same server
+```
+
+This gives you session persistence, since a user keeps hitting the same server. Think of a bodyguard who remembers your face and always sends you to the same room.
+
+![ip hash](/images/posts/load-balancing-algorithms/ip-hash.png)
+
+### 4. Least connections
+
+The request goes to the server with the fewest active connections.
+
+```text
+Server A → 10 active
+Server B → 3 active  ← chosen
+```
+
+It suits traffic that changes a lot. It treats all servers as equally strong, so a small server with few connections can still get overloaded.
+
+![least connections](/images/posts/load-balancing-algorithms/least-conn.png)
+
+### 5. Weighted least connections
+
+This one accounts for both load and capacity. Divide active connections by weight and pick the lowest number.
+
+```text
+Server A → 2 connections / weight 10 = 0.2  ← chosen
+Server B → 1 connection  / weight 1  = 1
+```
+
+A has more connections than B but a much bigger weight, so it gets the request. This fits real setups where the machines are not the same.
+
+![weighted least connections](/images/posts/load-balancing-algorithms/weighted-least-conn.png)
+
+### 6. Least response time
+
+The balancer picks the server that answers fastest. It multiplies the time to first byte (TTFB) by the active connections and chooses the lowest score.
+
+```text
+Server A → 3 × 2 = 6
+Server B → 2 × 0 = 0  ← chosen
+```
+
+If two servers tie, it falls back to round robin. Use it where latency matters.
+
+## Which one to use
+
+L4 gives you speed and simplicity. L7 gives you finer control and smarter routing. Static algorithms are easy to set up, and dynamic ones follow real traffic better.
+
+No single choice wins everywhere. Pick based on how big the system is, what the traffic looks like and how fast it needs to be. Production systems often mix several.
