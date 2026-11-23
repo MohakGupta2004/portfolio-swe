@@ -1,4 +1,5 @@
 ---
+import BlogList from './BlogList.astro';
 import { getBlogs } from '../data/blogs';
 
 // Only the 3 newest blogs on the landing page.
@@ -9,15 +10,8 @@ const newestBlogs = blogs.slice(0, 3);
 <section class="border-t border-dotted border-foreground/40 px-6 py-8">
 	<h2 class="font-heading text-2xl">Blogs</h2>
 
-	<div class="mt-4 space-y-3">
-		{
-			newestBlogs.map((blog) => (
-				<a href={`/blog/${blog.slug}`} class="group flex items-baseline justify-between gap-4 text-sm">
-					<span class="group-hover:dotted min-w-0 truncate">{blog.title}</span>
-					<span class="font-mono shrink-0 text-xs text-foreground/60">{blog.date}</span>
-				</a>
-			))
-		}
+	<div class="mt-4">
+		<BlogList blogs={newestBlogs} />
 	</div>
 
 	<a href="/blog" class="dotted mt-6 inline-block text-sm text-foreground/60 hover:text-foreground">view all blogs →</a>

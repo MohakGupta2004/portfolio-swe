@@ -111,6 +111,8 @@ Pages that are not built yet are empty: only the background color.
 
 ## Blogs section
 
+- Rows come from the shared `src/components/BlogList.astro` (used here and on `/blog`). It holds the hover effect: other rows blur, the thumbnail follows the cursor. Prop `large` gives the `/blog` look (Gaegu titles); the landing page uses the small look.
+
 - Component: `src/components/Blogs.astro`, rendered under Projects on the landing page, same dotted top border.
 - Heading "Blogs" is `font-heading` (`h2`). The 3 newest rows come from `src/data/blogs.ts`. Post bodies live in `src/content/blog/` and thumbnails in `public/images/blogs/`.
 - Row: title in `text-sm` main text on the left, date on the right in `font-mono text-xs text-foreground/60` (format `23.MAR.2026`). Whole row is a link to `/blog/<slug>`. Title gets the `.dotted` underline on hover.
