@@ -1,0 +1,157 @@
+---
+// Blog rows with the hover effect: other rows blur, the thumbnail follows the cursor.
+// Used on the landing page (small) and on /blog (large, Gaegu titles).
+interface Props {
+	blogs: { title: string; date: string; slug: string; thumbnail?: string }[];
+	large?: boolean;
+}
+
+const { blogs, large = false } = Astro.props;
+---
+
+<div class="blog-list relative">
+	{
+		blogs.map((blog) => (
+			<a
+				href={`/blog/${blog.slug}`}
+				class:list={['blog-row group flex items-baseline justify-between gap-4 text-sm', large ? 'py-2' : 'py-1.5']}
+			>
+				<span class:list={['group-hover:dotted min-w-0 truncate', large && 'font-heading text-2xl']}>{blog.title}</span>
+				<span class="font-mono shrink-0 text-xs text-foreground/60">{blog.date}</span>
+				<span class="blog-follow pointer-events-none absolute left-0 top-0 z-10">
+					{blog.thumbnail && (
+						<img
+							src={blog.thumbnail}
+							alt=""
+							loading="lazy"
+							decoding="async"
+							class="blog-thumb aspect-video w-72 -translate-x-1/2 rounded-md border border-foreground/40 object-cover"
+						/>
+					)}
+				</span>
+			</a>
+		))
+	}
+</div>
+
+<script>
+	// The thumbnail glides toward the cursor. Position is saved on the list as --x and --y.
+	const list = document.querySelector<HTMLElement>('.blog-list');
+
+	if (list && window.matchMedia('(hover: hover)').matches) {
+		let targetX = 0;
+		let targetY = 0;
+		let currentX = 0;
+		let currentY = 0;
+		let isRunning = false;
+
+		function move() {
+			currentX = currentX + (targetX - currentX) * 0.15;
+			currentY = currentY + (targetY - currentY) * 0.15;
+			list.style.setProperty('--x', currentX + 'px');
+			list.style.setProperty('--y', currentY + 'px');
+
+			const isFarAway = Math.abs(targetX - currentX) > 0.5 || Math.abs(targetY - currentY) > 0.5;
+			if (isFarAway) {
+				requestAnimationFrame(move);
+			} else {
+				isRunning = false;
+			}
+		}
+
+		list.addEventListener('mouseenter', (event) => {
+			// Start at the cursor so the image does not fly in from the corner.
+			const box = list.getBoundingClientRect();
+			currentX = event.clientX - box.left;
+			currentY = event.clientY - box.top;
+		});
+
+		list.addEventListener('mousemove', (event) => {
+			const box = list.getBoundingClientRect();
+			const firstThumb = list.querySelector<HTMLElement>('.blog-thumb');
+			const thumbHeight = firstThumb ? firstThumb.offsetHeight : 162;
+			const gap = 24;
+
+			// Image sits below the cursor. If it would run past the screen, it sits above.
+			let offsetY = gap;
+			if (event.clientY + gap + thumbHeight > window.innerHeight) {
+				offsetY = -(gap + thumbHeight);
+			}
+
+			targetX = event.clientX - box.left;
+			targetY = event.clientY - box.top + offsetY;
+			if (!isRunning) {
+				isRunning = true;
+				requestAnimationFrame(move);
+			}
+		});
+	}
+</script>
+
+<style>
+	/* Every row dims when any row is hovered, the hovered one stays full. */
+	.blog-list:has(.blog-row:hover) .blog-row {
+		opacity: 0.35;
+	}
+
+	.blog-list:has(.blog-row:hover) .blog-row:hover {
+		opacity: 1;
+	}
+
+	.blog-row {
+		transition: opacity 150ms ease-out;
+	}
+
+	/* Thumbnail sits hidden over the list until its row is hovered. */
+	.blog-follow {
+		transform: translate3d(var(--x, 0), var(--y, 0), 0);
+	}
+
+	.blog-thumb {
+		opacity: 0;
+		transform: scale(0.95);
+		transition: opacity 150ms ease-out;
+	}
+
+	@media (hover: none) {
+		.blog-thumb {
+			display: none;
+		}
+	}
+
+	@media (hover: hover) {
+		.blog-row:hover .blog-thumb {
+			opacity: 1;
+		}
+	}
+
+	/* Blur and scale only when the user allows motion. */
+	@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+		.blog-list:has(.blog-row:hover) .blog-row:not(:hover) {
+			filter: blur(3px);
+		}
+
+		.blog-row {
+			transition:
+				opacity 150ms ease-out,
+				filter 150ms ease-out;
+		}
+
+		.blog-thumb {
+			filter: blur(8px);
+			transition:
+				opacity 350ms ease-out,
+				transform 350ms ease-out,
+				filter 350ms ease-out;
+		}
+
+		.blog-row:hover .blog-thumb {
+			transform: scale(1);
+			filter: blur(0);
+			transition:
+				opacity 250ms cubic-bezier(0.2, 0.7, 0.2, 1),
+				transform 250ms cubic-bezier(0.2, 0.7, 0.2, 1),
+				filter 250ms cubic-bezier(0.2, 0.7, 0.2, 1);
+		}
+	}
+</style>
