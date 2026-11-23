@@ -55,7 +55,13 @@ function formatDate(date: Date) {
 
 {
 	entry ? (
-		<Layout>
+		<Layout
+			title={`${entry.data.title} | Mohak Gupta`}
+			description={entry.data.description}
+			image={entry.data.thumbnail}
+			type="article"
+			publishedTime={entry.data.date}
+		>
 			<main class="mx-auto flex min-h-screen max-w-2xl flex-col overflow-y-clip border-x border-dashed border-foreground/40">
 
 				<article class="px-6 py-8 pb-32">

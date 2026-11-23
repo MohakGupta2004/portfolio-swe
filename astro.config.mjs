@@ -11,6 +11,7 @@ const isDev = process.argv.includes('dev');
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://mohakgupta.in',
   // Dev server only listens on this computer, so the CMS cannot be reached from the network.
   server: { host: '127.0.0.1' },
   integrations: isDev ? [react(), mdx(), keystatic()] : [react(), mdx()],

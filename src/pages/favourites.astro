@@ -1,5 +1,109 @@
 ---
+import { FiSearch, FiChevronDown } from 'react-icons/fi';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import FavouriteList from '../components/FavouriteList.astro';
 import Layout from '../layouts/Layout.astro';
+import { categories, favourites } from '../data/favourites';
 ---
 
-<Layout />
+<Layout
+	title="Favourites | Mohak Gupta"
+	description="Books, movies, anime, series, games and design that Mohak Gupta keeps coming back to."
+>
+	<main class="mx-auto flex min-h-screen max-w-2xl flex-col overflow-y-clip border-x border-dashed border-foreground/40">
+		<Header />
+
+		<section class="px-6 py-8">
+			<h1 class="font-heading text-5xl font-bold">Favourites</h1>
+			<p class="mt-2 text-sm text-foreground/60">
+				A collection of stories, worlds, books, people, and ideas I keep coming back to.
+			</p>
+
+			<div class="mt-8 flex items-center gap-4 border-b border-dotted border-foreground/40 pb-3">
+				<div class="flex min-w-0 flex-1 items-center gap-2">
+					<FiSearch className="size-4 shrink-0 text-foreground/60" />
+					<input
+						id="favourite-search"
+						type="search"
+						placeholder="Search favourites"
+						class="min-w-0 flex-1 border-0 bg-transparent text-sm outline-none placeholder:text-foreground/40"
+					/>
+				</div>
+
+				<div class="flex shrink-0 items-center">
+					<select
+						id="favourite-category"
+						class="cursor-pointer appearance-none bg-transparent text-sm outline-none"
+					>
+						<option value="" class="bg-background text-foreground">All</option>
+						{
+							categories.map((category) => (
+								<option value={category.slug} class="bg-background text-foreground">
+									{category.label}
+								</option>
+							))
+						}
+					</select>
+					<FiChevronDown className="pointer-events-none size-4 text-foreground/60" />
+				</div>
+			</div>
+
+			<FavouriteList items={favourites} />
+		</section>
+
+		<div class="mt-auto">
+			<Footer />
+		</div>
+	</main>
+</Layout>
+
+<script>
+	const searchBox = document.querySelector<HTMLInputElement>('#favourite-search');
+	const categoryBox = document.querySelector<HTMLSelectElement>('#favourite-category');
+	const emptyNote = document.querySelector<HTMLElement>('#empty');
+
+	if (searchBox && categoryBox && emptyNote) {
+		const rows = document.querySelectorAll<HTMLElement>('.favourite-row');
+		let category = '';
+
+		function showRows() {
+			const query = searchBox.value.toLowerCase();
+			let shown = 0;
+
+			for (const row of rows) {
+				const sameCategory = category === '' || row.dataset.category === category;
+				const sameSearch = (row.dataset.search || '').includes(query);
+				row.hidden = !(sameCategory && sameSearch);
+
+				if (!row.hidden) {
+					shown = shown + 1;
+				}
+			}
+
+			emptyNote.hidden = shown > 0;
+
+			const url = category === '' ? window.location.pathname : window.location.pathname + '?category=' + category;
+			history.replaceState(null, '', url);
+		}
+
+		const slug = new URLSearchParams(window.location.search).get('category');
+		if (slug) {
+			for (const option of categoryBox.options) {
+				if (option.value === slug) {
+					category = slug;
+					categoryBox.value = slug;
+				}
+			}
+		}
+
+		searchBox.addEventListener('input', showRows);
+
+		categoryBox.addEventListener('change', () => {
+			category = categoryBox.value;
+			showRows();
+		});
+
+		showRows();
+	}
+</script>

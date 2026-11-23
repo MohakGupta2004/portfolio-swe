@@ -8,7 +8,10 @@ import { getBlogs } from '../../data/blogs';
 const blogs = await getBlogs();
 ---
 
-<Layout>
+<Layout
+	title="Blog | Mohak Gupta"
+	description="Posts by Mohak Gupta on backend engineering, system design, microservices, Rust and programming."
+>
 	<main class="mx-auto flex overflow-y-clip min-h-screen max-w-2xl flex-col border-x border-dashed border-foreground/40">
 		<Header />
 

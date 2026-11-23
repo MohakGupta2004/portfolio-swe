@@ -1,7 +1,7 @@
 ---
 const items = [
-	{ name: 'books', about: 'my collection of books' },
-	{ name: 'movies', about: 'my collection of movies' },
+	{ name: 'books', about: 'my collection of books', href: '/favourites?category=books' },
+	{ name: 'movies', about: 'my collection of movies', href: '/favourites?category=movies' },
 ];
 ---
 
@@ -11,7 +11,7 @@ const items = [
 	<div class="mt-4 space-y-2">
 		{
 			items.map((item) => (
-				<a href="/favourites" class="group block truncate font-heading text-xl">
+				<a href={item.href} class="group block truncate font-heading text-xl">
 					<span class="group-hover:dotted">{item.name}</span>
 					<span class="text-foreground/60"> / {item.about}</span>
 				</a>

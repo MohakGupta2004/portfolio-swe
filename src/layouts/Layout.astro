@@ -1,5 +1,49 @@
 ---
 import '../styles/global.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+	image?: string;
+	type?: 'website' | 'article';
+	publishedTime?: Date;
+	noindex?: boolean;
+}
+
+const siteName = 'Mohak Gupta';
+const defaultDescription =
+	'Mohak Gupta is a software developer and CS student in Kolkata. Backend, cloud and systems projects, writing and the work I ship.';
+
+const {
+	title = 'Mohak Gupta | Software Developer',
+	description = defaultDescription,
+	image = '/icon-512.png',
+	type = 'website',
+	publishedTime,
+	noindex = false,
+} = Astro.props;
+
+// Canonical drops the query string, so /favourites?category=books points to /favourites.
+let canonicalPath = Astro.url.pathname;
+if (canonicalPath.length > 1 && canonicalPath.endsWith('/')) {
+	canonicalPath = canonicalPath.slice(0, -1);
+}
+const canonicalUrl = new URL(canonicalPath, Astro.site);
+const imageUrl = new URL(image, Astro.site);
+
+// Only the home page describes the person.
+const personData = {
+	'@context': 'https://schema.org',
+	'@type': 'Person',
+	name: 'Mohak Gupta',
+	alternateName: 'rushbeef04',
+	url: Astro.site?.href,
+	image: new URL('/pfp.jpeg', Astro.site).href,
+	jobTitle: 'Software Developer',
+	address: { '@type': 'PostalAddress', addressLocality: 'Kolkata', addressCountry: 'IN' },
+	sameAs: ['https://github.com/MohakGupta2004', 'https://www.linkedin.com/in/mohak-gupta-007065294'],
+};
+const isHome = Astro.url.pathname === '/';
 ---
 
 <!doctype html>
@@ -7,8 +51,9 @@ import '../styles/global.css';
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
+		<link rel="icon" href="/favicon.ico" sizes="48x48" />
+		<link rel="icon" type="image/png" href="/icon-512.png" sizes="512x512" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<!-- Load fonts early so a page change does not flash the fallback font. -->
 		<link rel="preload" href="/fonts/gaegu/gaegu-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
 		<link rel="preload" href="/fonts/gaegu/gaegu-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
@@ -24,7 +69,29 @@ import '../styles/global.css';
 				}
 			} catch (error) {}
 		</script>
-		<title>Portfolio</title>
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="author" content={siteName} />
+		{noindex && <meta name="robots" content="noindex" />}
+		<link rel="canonical" href={canonicalUrl.href} />
+		<link rel="sitemap" href="/sitemap.xml" />
+		<meta name="theme-color" content="#000000" />
+
+		<meta property="og:site_name" content={siteName} />
+		<meta property="og:type" content={type} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalUrl.href} />
+		<meta property="og:image" content={imageUrl.href} />
+		<meta property="og:locale" content="en_US" />
+		{publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
+
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={imageUrl.href} />
+
+		{isHome && <script type="application/ld+json" set:html={JSON.stringify(personData)} />}
 	</head>
 	<body class="min-h-screen">
 		<slot />

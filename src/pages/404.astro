@@ -1,0 +1,21 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Page not found | Mohak Gupta" description="This page does not exist." noindex>
+	<main class="mx-auto flex min-h-screen max-w-2xl flex-col border-x border-dashed border-foreground/40">
+		<Header />
+
+		<section class="px-6 py-8">
+			<h1 class="font-heading text-5xl font-bold">404</h1>
+			<p class="mt-2 text-sm text-foreground/60">This page does not exist.</p>
+			<a href="/" class="mt-6 inline-block text-sm dotted">Go home</a>
+		</section>
+
+		<div class="mt-auto">
+			<Footer />
+		</div>
+	</main>
+</Layout>

@@ -4,6 +4,9 @@ import SocialLinks from './SocialLinks.astro';
 
 const currentPath = Astro.url.pathname;
 
+// Only the home page has no other h1, so the name is the h1 there.
+const NameTag = currentPath === '/' ? 'h1' : 'p';
+
 const links = [
 	{ label: 'Home', href: '/' },
 	{ label: 'Blog', href: '/blog' },
@@ -27,9 +30,9 @@ function isActive(href: string) {
 				alt="Mohak Gupta"
 				class="size-12 rounded-lg object-cover motion-safe:transition-transform motion-safe:duration-200 group-hover:-rotate-6"
 			/>
-			<p class="font-heading text-2xl">
+			<NameTag class="font-heading text-2xl font-normal">
 				Mohak Gupta <span class="text-foreground/60">aka</span> <span class="italic">rushbeef04</span>
-			</p>
+			</NameTag>
 		</a>
 		<div class="ml-auto">
 			<SocialLinks />
