@@ -1,5 +1,267 @@
 ---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 import Layout from '../layouts/Layout.astro';
+import { projects } from '../data/projects';
 ---
 
-<Layout />
+<Layout>
+	<main class="mx-auto flex min-h-screen max-w-2xl flex-col border-x border-dashed border-foreground/40">
+		<Header />
+
+		<!-- Rough chalk edge for the diagram boxes. -->
+		<svg width="0" height="0" aria-hidden="true" focusable="false" class="absolute">
+			<defs>
+				<filter id="chalk-rough" x="-5%" y="-20%" width="110%" height="140%">
+					<feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="3" result="noise"></feTurbulence>
+					<feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6" xChannelSelector="R" yChannelSelector="G"
+					></feDisplacementMap>
+				</filter>
+			</defs>
+		</svg>
+
+		<section class="px-6 py-8">
+			<h1 class="font-heading text-5xl font-bold">Projects</h1>
+			<p class="mt-2 text-sm text-foreground/60">Things I built from scratch, end to end.</p>
+
+			<nav class="tabs sticky top-0 z-10 mt-8 flex gap-6 overflow-x-auto border-b border-dotted border-foreground/40 bg-background">
+				{
+					projects.map((project) => (
+						<a href={`#${project.id}`} data-tab={project.id} class="tab shrink-0 py-3 text-sm text-foreground/60 hover:text-foreground">
+							{project.name}
+						</a>
+					))
+				}
+			</nav>
+
+			{
+				projects.map((project) => (
+					<article id={project.id} data-project class="project border-b border-dotted border-foreground/40 py-10 last:border-b-0">
+						<h2 class="font-heading text-4xl font-bold">{project.name}</h2>
+						<p class="mt-1 text-sm text-foreground/60">{project.tagline}</p>
+						<p class="mt-5 leading-relaxed">{project.intro}</p>
+
+						<ul class="mt-5 space-y-3">
+							{project.points.map((point) => (
+								<li class="flex gap-3 text-sm leading-relaxed text-foreground/60">
+									<span class="bullet mt-1.5 size-2 shrink-0" />
+									{point}
+								</li>
+							))}
+						</ul>
+
+						<div class="diagram mt-8" data-diagram>
+							<div class="flex flex-wrap items-center gap-x-2 gap-y-4">
+								{project.steps.map((step, index) => (
+									<>
+										{index > 0 && (
+											<span class="arrow text-foreground/60" style={`--i: ${index * 2 - 1}`} aria-hidden="true">
+												→
+											</span>
+										)}
+										<button
+											type="button"
+											class="box"
+											style={`--i: ${index * 2}`}
+											data-text={`${step.label}: ${step.text}`}
+										>
+											{step.label}
+										</button>
+									</>
+								))}
+							</div>
+							<div class="mt-4 flex items-start justify-between gap-4">
+								<p class="caption text-xs text-foreground/60" data-caption>
+									Hover or tap a box to see what it does.
+								</p>
+								<button type="button" class="shrink-0 cursor-pointer text-xs text-foreground/60 hover:text-foreground hover:dotted" data-redraw>
+									redraw
+								</button>
+							</div>
+						</div>
+
+						<ul class="mt-6 flex flex-wrap gap-2">
+							{project.tech.map((name) => (
+								<li class="rounded border border-foreground/30 px-2 py-1 text-xs text-foreground/60">{name}</li>
+							))}
+						</ul>
+
+						<div class="mt-6 flex gap-6 text-sm">
+							{project.live && (
+								<a href={project.live} target="_blank" rel="noopener noreferrer" class="hover:dotted">
+									Live site ↗
+								</a>
+							)}
+							<a href={project.github} target="_blank" rel="noopener noreferrer" class="hover:dotted">
+								GitHub ↗
+							</a>
+						</div>
+					</article>
+				))
+			}
+		</section>
+
+		<div class="mt-auto">
+			<Footer />
+		</div>
+	</main>
+</Layout>
+
+<style>
+	:global(html) {
+		scroll-behavior: smooth;
+	}
+
+	.project {
+		scroll-margin-top: 3.5rem;
+	}
+
+	.tab {
+		border-bottom: 2px solid transparent;
+		margin-bottom: -1px;
+	}
+
+	.tab.active {
+		color: var(--color-foreground);
+		border-bottom-color: var(--accent);
+	}
+
+	.bullet {
+		background: var(--accent);
+	}
+
+	.box {
+		cursor: pointer;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.75rem;
+		color: var(--color-foreground);
+		border: 1.5px solid color-mix(in srgb, var(--color-foreground) 75%, transparent);
+		border-radius: 0.5rem;
+		filter: url(#chalk-rough);
+		transition: border-color 150ms, color 150ms, box-shadow 150ms;
+	}
+
+	.box:hover,
+	.box:focus-visible,
+	.box.active {
+		color: var(--accent);
+		border-color: var(--accent);
+		box-shadow: 0 0 0 1px var(--accent);
+		outline: none;
+	}
+
+	/* Boxes and arrows appear one after another when the diagram scrolls into view. */
+	.box,
+	.arrow {
+		opacity: 0;
+	}
+
+	.drawn .box,
+	.drawn .arrow {
+		animation: draw 400ms ease-out forwards;
+		animation-delay: calc(var(--i) * 120ms);
+	}
+
+	@keyframes draw {
+		from {
+			opacity: 0;
+			transform: translateY(6px) scale(0.96);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		:global(html) {
+			scroll-behavior: auto;
+		}
+
+		.box,
+		.arrow {
+			opacity: 1;
+		}
+
+		.drawn .box,
+		.drawn .arrow {
+			animation: none;
+		}
+	}
+</style>
+
+<script>
+	const DEFAULT_CAPTION = 'Hover or tap a box to see what it does.';
+
+	function setupDiagram(diagram: HTMLElement) {
+		const boxes = diagram.querySelectorAll<HTMLButtonElement>('.box');
+		const caption = diagram.querySelector<HTMLElement>('[data-caption]')!;
+		const redrawButton = diagram.querySelector<HTMLElement>('[data-redraw]')!;
+
+		function showBox(box: HTMLButtonElement) {
+			for (const other of boxes) {
+				other.classList.remove('active');
+			}
+			box.classList.add('active');
+			caption.textContent = box.dataset.text || '';
+		}
+
+		function clearBoxes() {
+			for (const box of boxes) {
+				box.classList.remove('active');
+			}
+			caption.textContent = DEFAULT_CAPTION;
+		}
+
+		for (const box of boxes) {
+			box.addEventListener('mouseenter', () => showBox(box));
+			box.addEventListener('focus', () => showBox(box));
+			box.addEventListener('click', () => showBox(box));
+		}
+		diagram.addEventListener('mouseleave', clearBoxes);
+
+		redrawButton.addEventListener('click', () => {
+			clearBoxes();
+			diagram.classList.remove('drawn');
+			void diagram.offsetWidth; // restart the animation
+			diagram.classList.add('drawn');
+		});
+
+		const watcher = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting) {
+					diagram.classList.add('drawn');
+					watcher.disconnect();
+				}
+			},
+			{ threshold: 0.4 },
+		);
+		watcher.observe(diagram);
+	}
+
+	function setupTabs() {
+		const tabs = document.querySelectorAll<HTMLElement>('[data-tab]');
+		const projects = document.querySelectorAll<HTMLElement>('[data-project]');
+		const TAB_OFFSET = 140;
+
+		function markActiveTab() {
+			let currentId = projects[0].id;
+			for (const project of projects) {
+				if (project.getBoundingClientRect().top < TAB_OFFSET) {
+					currentId = project.id;
+				}
+			}
+			for (const tab of tabs) {
+				tab.classList.toggle('active', tab.dataset.tab === currentId);
+			}
+		}
+
+		window.addEventListener('scroll', markActiveTab, { passive: true });
+		markActiveTab();
+	}
+
+	for (const diagram of document.querySelectorAll<HTMLElement>('[data-diagram]')) {
+		setupDiagram(diagram);
+	}
+	setupTabs();
+</script>
