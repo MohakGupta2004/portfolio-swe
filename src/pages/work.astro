@@ -1,5 +1,43 @@
 ---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ProductList from '../components/ProductList.astro';
 import Layout from '../layouts/Layout.astro';
+import { workGroups } from '../data/work';
 ---
 
-<Layout />
+<Layout>
+	<main class="mx-auto flex min-h-screen max-w-2xl flex-col overflow-y-clip border-x border-dashed border-foreground/40">
+		<Header />
+
+		<section class="px-6 py-8">
+			<h1 class="font-heading text-5xl font-bold">Work</h1>
+			<p class="mt-2 text-sm text-foreground/60">Products I helped ship. Open a row for what I did.</p>
+
+			{
+				workGroups.map((group) => (
+					<div class="mt-10">
+						<div class="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+							<div class="flex items-center gap-3">
+								{group.logo && <img src={group.logo} alt="" class="size-9 shrink-0 rounded-full object-cover" />}
+								<div>
+									<h2 class="font-heading text-3xl font-bold">{group.title}</h2>
+									<p class="text-sm text-foreground/60">{group.subtitle}</p>
+								</div>
+							</div>
+							{group.dates && <p class="font-mono shrink-0 pt-2 text-xs text-foreground/60">{group.dates}</p>}
+						</div>
+
+						<div class="mt-4 border-t border-dotted border-foreground/40">
+							<ProductList products={group.products} />
+						</div>
+					</div>
+				))
+			}
+		</section>
+
+		<div class="mt-auto">
+			<Footer />
+		</div>
+	</main>
+</Layout>

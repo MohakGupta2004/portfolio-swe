@@ -36,6 +36,7 @@ Self-hosted in `public/fonts/`, Latin subset, `.woff2`. Each folder has its `OFL
 | JetBrains Mono | `jetbrains-mono/jetbrains-mono-latin-wght-normal.woff2` | 100–800 (variable) |
 
 - **Sono** is one variable file. `font-mono` sets `font-variation-settings: "MONO" 1` so it renders as monospace. Do not override this.
+- `Layout.astro` preloads Gaegu 400 and 700, JetBrains Mono and Sono, so a page change does not flash the fallback font. Preload any new font used above the fold.
 - Gaegu only has 300, 400 and 700. Do not use other weights with `font-heading`.
 
 ## Color
@@ -46,6 +47,7 @@ Two themes. Dark is the default. The choice is saved in `localStorage` under `th
 | --- | --- | --- | --- | --- |
 | `--color-background` | `#2e2e2e` | `#f5f5f3` | `bg-background` | Page background (set on `body`) |
 | `--color-foreground` | `#ececec` | `#2e2e2e` | `text-foreground`, `border-foreground` | Text and lines (default text color on `body`) |
+| `--accent` | `#8fd3f4` | `#1d6fa5` | `var(--accent)` in page CSS | Active tab, bullets and highlighted diagram boxes on `/projects` |
 
 - Use opacity for muted text and lines, e.g. `text-foreground/60`, `border-foreground/40`.
 - Add new colors only as CSS variables for both themes in `global.css`, then list them here.
@@ -97,7 +99,7 @@ Pages that are not built yet are empty: only the background color.
 - Row: round logo (`public/valstrand.webp`, `size-9`, `rounded-full`), then `Company (Role)` in `font-semibold` main text, a muted `/`, then the one-liner in `text-foreground/60`. Row text is `text-sm`.
 - No links, no underline and no arrows on the rows.
 - To change the role, edit the `job` object in the component.
-- Below the list, a "view all work →" text link goes to `/work`: `.dotted` underline, `text-sm`, muted. Arrow links are only the two "view all" links. No button box. The `/work` page stays empty for now.
+- Below the list, a "view all work →" text link goes to `/work`: `.dotted` underline, `text-sm`, muted. Arrow links are only the two "view all" links. No button box. The `/work` page lists the products (see "Work page").
 
 ## Projects section
 
@@ -169,3 +171,18 @@ Pages that are not built yet are empty: only the background color.
 - Post images must stay under `/images/posts/<slug>/`. Keystatic only shows images from that folder and escapes any other image path when you save.
 - Thumbnail is a plain path field: put the file in `public/images/blogs/` and type `/images/blogs/<file>`.
 - Saving in the CMS rewrites the file a little (YAML quoting, `*` bullets). The content stays the same.
+
+
+## Projects page
+
+- Route `projects.astro` (`/projects`), same shell as `/blog`. Data lives in `src/data/projects.ts` (one object per project, facts from the resume). Add a project by adding one object.
+- Sticky tab row of anchors (one per project), the active tab follows the scroll. Each project is a stacked section: `font-heading` (Gaegu) name, muted tagline, intro, square accent bullets, chalk diagram, tech chips, Live site / GitHub links.
+- Diagram: buttons with a rough chalk edge (SVG `feTurbulence` filter `#chalk-rough`). Boxes and arrows draw in one by one when scrolled into view. Hover, focus or tap a box to light it up and show what it does. "redraw" replays the animation. Reduced motion skips the animation.
+
+## Work page
+
+- Route `work.astro` (`/work`), same shell as `/projects`. Data in `src/data/work.ts` (groups of products, facts from the resume, live sites and repos). Add a product by adding one object to a group.
+- Groups are the two phases at Valstrand Solutions, newest first: "Software Engineer" (part-time, FEB.2026 – PRESENT) and "Full Stack Intern" (DEC.2025 – FEB.2026). Each has the logo, the company in the subtitle and dates in `font-mono`. Titles are `font-heading`. Dates and the phase split come from `~/Documents/resume/linkedin-update.md`.
+- Rows come from `src/components/ProductList.astro`, one native `<details>` per product. Closed: Gaegu name, one-line summary, domain in `font-mono`. Hover (hover devices): other rows blur and dim, the screenshot follows the cursor (same effect as the blog list). Open: bullets with accent squares, role chips (filled), tech chips (outlined), visit link.
+- Screenshots are in `public/images/work/`. On touch devices the screenshot shows inside the open row instead. Products without a screenshot (login-gated apps) have no thumbnail.
+- Do not copy marketing numbers from client sites as achievements.
