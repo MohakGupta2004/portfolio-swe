@@ -1,0 +1,325 @@
+---
+interface Props {
+	headings: Array<{ depth: number; slug: string; text: string }>;
+}
+
+const { headings } = Astro.props;
+const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+
+{
+	items.length >= 2 && (
+		<div class="toc" data-open="false">
+			<div class="toc-backdrop fixed inset-0 z-30 bg-background/60 backdrop-blur-sm" />
+
+			<div
+				class="toc-card fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 flex-col overflow-hidden rounded-full border border-foreground/20 bg-background"
+			>
+				<div class="toc-panel px-3" id="post-toc-panel">
+					<p class="pb-1 pt-2 text-[0.625rem] uppercase tracking-widest text-foreground/60">Table of contents</p>
+
+					<ul class="toc-list">
+						{items.map((heading, index) => (
+							<li style={`--i:${Math.min(index, 12)}`}>
+								<button
+									type="button"
+									class:list={[
+										'toc-row cursor-pointer flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm text-foreground/60 hover:text-foreground',
+										heading.depth === 3 && 'pl-6',
+									]}
+									data-target={heading.slug}
+								>
+									<span class="truncate">{heading.text}</span>
+									<span class="toc-row-dot size-1.5 shrink-0 rounded-full bg-current opacity-0" />
+								</button>
+							</li>
+						))}
+					</ul>
+				</div>
+
+				<button
+					type="button"
+					class="toc-pill cursor-pointer flex w-full items-center gap-3 px-5 py-3 text-sm"
+					aria-expanded="false"
+					aria-controls="post-toc-panel"
+				>
+					<span class="size-1.5 shrink-0 rounded-full bg-foreground" />
+					<span class="min-w-0 flex-1 truncate text-left" data-toc-label>Introduction</span>
+					<svg class="size-7 shrink-0 -rotate-90" viewBox="0 0 28 28" aria-hidden="true">
+						<circle
+							cx="14"
+							cy="14"
+							r="10"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="3"
+							opacity="0.2"
+						/>
+						<circle
+							class="toc-ring"
+							cx="14"
+							cy="14"
+							r="10"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="3"
+							stroke-linecap="round"
+						/>
+					</svg>
+				</button>
+			</div>
+		</div>
+	)
+}
+
+<script>
+	const toc = document.querySelector<HTMLElement>('.toc');
+
+	if (toc) {
+		const pill = toc.querySelector<HTMLButtonElement>('.toc-pill');
+		const backdrop = toc.querySelector<HTMLElement>('.toc-backdrop');
+		const label = toc.querySelector<HTMLElement>('[data-toc-label]');
+		const ring = toc.querySelector<SVGCircleElement>('.toc-ring');
+		const rows = Array.from(toc.querySelectorAll<HTMLButtonElement>('.toc-row'));
+
+		if (pill && backdrop && label && ring && rows.length > 0) {
+			const headings = rows
+				.map((row) => document.getElementById(row.dataset.target ?? ''))
+				.filter((heading): heading is HTMLElement => heading !== null);
+
+			// Ring math: circumference is the full dash length.
+			const ringLength = 2 * Math.PI * ring.r.baseVal.value;
+			ring.style.strokeDasharray = `${ringLength}`;
+
+			let ticking = false;
+
+			// The current section is the last heading above 30% of the screen.
+			function currentIndex() {
+				const line = window.innerHeight * 0.3;
+				let index = -1;
+
+				headings.forEach((heading, i) => {
+					if (heading.getBoundingClientRect().top <= line) {
+						index = i;
+					}
+				});
+
+				return index;
+			}
+
+			function update() {
+				ticking = false;
+
+				const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+				const progress = maxScroll > 0 ? Math.min(Math.max(window.scrollY / maxScroll, 0), 1) : 0;
+				ring.style.strokeDashoffset = `${ringLength * (1 - progress)}`;
+
+				const index = currentIndex();
+				label.textContent = index >= 0 ? headings[index].textContent : 'Introduction';
+
+				rows.forEach((row, i) => {
+					const isCurrent = i === index;
+
+					row.classList.toggle('bg-foreground/10', isCurrent);
+					row.classList.toggle('text-foreground', isCurrent);
+					row.classList.toggle('text-foreground/60', !isCurrent);
+
+					const dot = row.querySelector<HTMLElement>('.toc-row-dot');
+					dot?.classList.toggle('opacity-0', !isCurrent);
+				});
+			}
+
+			function onScroll() {
+				if (ticking) return;
+				ticking = true;
+				requestAnimationFrame(update);
+			}
+
+			function setOpen(open: boolean) {
+				toc.dataset.open = String(open);
+				pill.setAttribute('aria-expanded', String(open));
+			}
+
+			pill.addEventListener('click', () => setOpen(toc.dataset.open !== 'true'));
+			backdrop.addEventListener('click', () => setOpen(false));
+
+			document.addEventListener('keydown', (event) => {
+				if (event.key === 'Escape') {
+					setOpen(false);
+				}
+			});
+
+			rows.forEach((row) => {
+				row.addEventListener('click', () => {
+					const target = document.getElementById(row.dataset.target ?? '');
+					const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+					target?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+					setOpen(false);
+				});
+			});
+
+			window.addEventListener('scroll', onScroll, { passive: true });
+			window.addEventListener('resize', onScroll);
+			update();
+		}
+	}
+</script>
+
+<style>
+	/* Closed: the panel takes no room, so only the pill row shows. */
+	.toc-panel {
+		overflow: hidden;
+		max-height: 0;
+		opacity: 0;
+		visibility: hidden;
+		transition:
+			max-height 150ms ease-out,
+			opacity 150ms ease-out,
+			visibility 0s 150ms;
+	}
+
+	.toc[data-open='true'] .toc-panel {
+		max-height: 70vh;
+		opacity: 1;
+		visibility: visible;
+		transition:
+			max-height 200ms ease-out,
+			opacity 200ms ease-out,
+			visibility 0s;
+	}
+
+	/* Closed pill is narrow. It grows wider when the panel opens. */
+	.toc-card {
+		width: min(17rem, calc(100vw - 2rem));
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.toc-card {
+			transition:
+				width 350ms cubic-bezier(0.34, 1.4, 0.64, 1),
+				transform 150ms ease-out,
+				border-color 150ms ease-out;
+		}
+	}
+
+	.toc[data-open='true'] .toc-card {
+		width: min(24rem, calc(100vw - 2rem));
+	}
+
+	/* Open: the card turns into a rounded panel with the pill as its footer row. */
+	.toc[data-open='true'] .toc-card {
+		padding: 0.5rem;
+		border-radius: 1rem;
+	}
+
+	.toc[data-open='true'] .toc-pill {
+		padding: 0.75rem 0.75rem 0.25rem;
+		margin-top: 0.5rem;
+		border-top: 1px solid color-mix(in srgb, var(--color-foreground) 15%, transparent);
+	}
+
+	.toc-list {
+		max-height: calc(70vh - 7rem);
+		overflow-y: auto;
+		scrollbar-width: none;
+	}
+
+	.toc-list::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* Backdrop fades in behind the open panel. */
+	.toc-backdrop {
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 150ms ease-out;
+	}
+
+	.toc[data-open='true'] .toc-backdrop {
+		opacity: 1;
+		pointer-events: auto;
+		transition: opacity 200ms ease-out;
+	}
+
+	/* The list fades in. Moving and blurring only when motion is allowed. */
+	.toc-list {
+		opacity: 0;
+		transition: opacity 150ms ease-out;
+	}
+
+	.toc[data-open='true'] .toc-list {
+		opacity: 1;
+		transition: opacity 200ms ease-out;
+	}
+
+	/* Hover: closed pill lifts a little, rows get a soft background, pressing shrinks the pill. */
+	.toc-pill {
+		transition: background-color 150ms ease-out;
+	}
+
+	/* Hover brightens the card border. No box inside the pill. */
+	.toc[data-open='false'] .toc-card:hover {
+		border-color: color-mix(in srgb, var(--color-foreground) 45%, transparent);
+	}
+
+	.toc-row {
+		transition:
+			background-color 150ms ease-out,
+			color 150ms ease-out,
+			padding-left 150ms ease-out;
+	}
+
+	.toc-row:hover {
+		background-color: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.toc[data-open='false'] .toc-card:hover {
+			transform: translateY(-2px) scale(1.03);
+		}
+
+		.toc-card:active {
+			transform: scale(0.97);
+		}
+
+		.toc-row:hover {
+			padding-left: 1rem;
+		}
+
+		/* Rows slide in one after another when the panel opens. */
+		.toc-row {
+			opacity: 0;
+			transform: translateY(6px);
+		}
+
+		.toc[data-open='true'] .toc-row {
+			opacity: 1;
+			transform: translateY(0);
+			transition:
+				opacity 250ms ease-out calc(var(--i) * 25ms + 60ms),
+				transform 250ms cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i) * 25ms + 60ms),
+				background-color 150ms ease-out,
+				color 150ms ease-out,
+				padding-left 150ms ease-out;
+		}
+
+		.toc-list {
+			transform: translateY(8px);
+			filter: blur(6px);
+			transition:
+				opacity 150ms ease-out,
+				transform 150ms ease-out,
+				filter 150ms ease-out;
+		}
+
+		.toc[data-open='true'] .toc-list {
+			transform: translateY(0);
+			filter: blur(0);
+			transition:
+				opacity 200ms ease-out,
+				transform 200ms ease-out,
+				filter 200ms ease-out;
+		}
+	}
+</style>

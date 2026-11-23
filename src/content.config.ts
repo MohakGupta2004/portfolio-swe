@@ -1,0 +1,15 @@
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+
+// Only rewritten posts live in src/content/blog. Old drafts are in src/content/drafts.
+const blog = defineCollection({
+	loader: glob({ pattern: '*.mdx', base: './src/content/blog' }),
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		date: z.coerce.date(),
+		thumbnail: z.string().optional(),
+	}),
+});
+
+export const collections = { blog };

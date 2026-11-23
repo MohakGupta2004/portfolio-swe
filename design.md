@@ -15,7 +15,7 @@ Follow these rules on every page and component. If a rule needs to change, chang
 | --- | --- | --- | --- |
 | Main text | JetBrains Mono | `font-sans` (default on `body`) | Paragraphs, UI text, links, buttons, labels |
 | Heading | Gaegu | `font-heading` | Section headings, card titles (`h2`–`h4`) |
-| Big heading | Inter | `font-display` | Hero and page titles (`h1`), large statements |
+| Big heading | Inter | `font-display` | Hero and page titles (`h1`), large statements. Blog post titles use Gaegu (`font-heading`). |
 | Dates | Sono (monospace) | `font-mono` | Dates, timestamps, durations, version numbers |
 
 Rules:
@@ -54,6 +54,8 @@ Two themes. Dark is the default. The choice is saved in `localStorage` under `th
 
 ## Pages
 
+- The scrollbar is hidden on every page (`scrollbar-width: none` and `::-webkit-scrollbar` on `html`). Scrolling still works. This also stops the centered column from shifting between pages.
+
 Routes in `src/pages/`. Every page wraps its content in `src/layouts/Layout.astro`.
 
 | Page | File | URL |
@@ -65,12 +67,13 @@ Routes in `src/pages/`. Every page wraps its content in `src/layouts/Layout.astr
 | Favourites | `favourites.astro` | `/favourites` |
 | Work | `work.astro` | `/work` |
 
-All pages are empty for now: only the background color.
+Pages that are not built yet are empty: only the background color.
 
 ## Landing page layout
 
 - Content column: `max-w-xl`, centered, with dashed left and right borders (`border-x border-dashed border-foreground/40`).
 - Header (`src/components/Header.astro`): profile picture (`public/pfp.jpeg`) + name in `font-heading`, then a dotted line, then the nav row.
+- Profile picture and name are one link to `/`. Hovering either tilts the picture 6deg (`group-hover:-rotate-6`, 200ms, motion-safe only).
 - Name format: "Mohak Gupta *aka* rushbeef04". "aka" is muted, handle is italic.
 - Social icons (`src/components/SocialLinks.astro`): top right of the name row, inside the content column only. GitHub, LinkedIn, Email, Download resume. Round-stroke line icons (1.75 stroke, round caps and joins) to match Gaegu. Muted `text-foreground/60`, full on hover. Social links open in a new tab. The resume icon downloads `/resume.pdf` (file not added yet).
 - Nav: Home, Blog, Projects, Work, Favourites, Resume. `font-heading`. Active link is full `text-foreground` with a dotted underline, others are `text-foreground/60`.
@@ -109,10 +112,32 @@ All pages are empty for now: only the background color.
 ## Blogs section
 
 - Component: `src/components/Blogs.astro`, rendered under Projects on the landing page, same dotted top border.
-- Heading "Blogs" is `font-heading` (`h2`). 3 hardcoded rows (title, date, slug) from `~/Projects/portfolio-mdx/blog`. Do not copy blog content.
+- Heading "Blogs" is `font-heading` (`h2`). The 3 newest rows come from `src/data/blogs.ts`. Post bodies live in `src/content/blog/` and thumbnails in `public/images/blogs/`.
 - Row: title in `text-sm` main text on the left, date on the right in `font-mono text-xs text-foreground/60` (format `23.MAR.2026`). Whole row is a link to `/blog/<slug>`. Title gets the `.dotted` underline on hover.
 - Below the list, a "view all blogs →" link to `/blog`, same style as the other "view all" links (now three arrow links).
-- `blog/[slug].astro` has the same 3 slugs hardcoded in `getStaticPaths`. The pages stay empty for now.
+- `blog/[slug].astro` reads all posts from the `blog` collection (`src/content/blog/`).
+
+## Blog page
+
+- Route: `blog/index.astro` (`/blog`). Same shell as the landing page: the `max-w-2xl` column with dashed side borders, `Header`, then the content, then `Footer`.
+- Data: `src/data/blogs.ts` exports `blogs`, newest first. Each entry has `title`, `date` (`19.APR.2026`), `slug` and `thumbnail` (`/images/blogs/<slug>.jpg`). The landing page Blogs section and this page both read from this file.
+- Titles use `font-heading` (Gaegu) at `text-2xl`. The page is a flex column, so the footer sits at the bottom of the viewport on short pages (`mt-auto`). The thumbnail follows the cursor with easing and sits 24px below it (flips above when there is no room below), never under the pointer. `main` has `overflow-y-clip` so the thumbnail never adds a scrollbar (small inline script, lerp 0.15).
+- Page heading: `h1` "Blog" in `font-heading text-5xl font-bold` (Gaegu), then a one-line subtitle in `text-sm text-foreground/60`: "Thoughts, tutorials, and insights on engineering and programming." No banner box.
+- Rows: title left (`text-sm`, truncated to one line), date right (`font-mono text-xs text-foreground/60`). Whole row links to `/blog/<slug>`, rows spaced with `py-3`.
+- Hover (CSS only, no JS): the list wrapper is `relative`. `:has()` on the wrapper blurs (`blur(3px)`) and dims (`opacity .35`) every row except the hovered one. The hovered row stays sharp and its title gets `.dotted`.
+- Thumbnail: inside each row, hidden by default, `w-72`, `aspect-video`, `object-cover`, `rounded-md`, `border border-foreground/40`, `pointer-events-none`, `z-10`. It follows the cursor (see above). In: opacity 0→1, scale .95→1, blur 8px→0 in 250ms `cubic-bezier(.2,.7,.2,1)`. Out: blur 0→8px, fade to 0 and scale to .95 over 350ms `ease-out`, so it dissolves away.
+- Transitions only on `filter`, `opacity` and `transform`. The scale and blur parts sit behind `@media (prefers-reduced-motion: no-preference)`; with reduced motion only opacity fades.
+- `@media (hover: none)`: no thumbnail and no blur.
+- Thumbnails use `loading="lazy"`, `decoding="async"`, `alt=""` (decorative).
+
+## Blog post page
+
+- Route: `blog/[slug].astro`. Same shell as `/blog`. Posts come from the `blog` collection in `src/content/blog/` (MDX, frontmatter `title`, `description`, `date`). The blog list (`src/data/blogs.ts`, `getBlogs()`) reads the posts themselves, sorted by date. Post images live in `public/images/posts/<slug>/`, thumbnails in `public/images/blogs/`.
+- No `Header`, no navbar and no nav links on a post page. The breadcrumb is the only navigation.
+- Breadcrumb (`text-sm`): round pfp, "Mohak Gupta", muted `/`, "Writing" link to `/blog`, muted `/`, post title truncated and muted. Links get `hover:dotted`.
+- Title is `h1` in Gaegu (`font-heading text-5xl font-bold`), no cover image anywhere on the post page. Date under it in `font-mono text-xs text-foreground/60`, format `19.APR.2026`.
+- Body sits in `.post-body` (`text-sm`, justified JetBrains Mono, drop cap on the first letter, Gaegu `h2`/`h3`, dotted links, code blocks, images, tables, quotes). Astro adds heading ids.
+- `PostToc.astro`: floating pill at the bottom center shows the current section and a circular scroll-progress ring. Clicking it opens a card above the pill with all h2/h3 rows, a blurred backdrop, Escape/backdrop to close, smooth scroll to a heading. Closed pill is 17rem wide and grows to 24rem when open; a thin divider separates the list from the footer row; the ring is 3px thick. The pill and rows use `cursor-pointer`. Hover: the closed pill lifts 2px and grows 3%, rows get a soft background and slide 0.5rem right, pressing shrinks the card. Open: the card grows with a slight spring (350ms), rows fade and slide up one after another (25ms apart). All motion is skipped with reduced motion. Hidden below two headings.
 
 ## Achievements, Personal, Work with me, Footer
 
@@ -121,7 +146,7 @@ All pages are empty for now: only the background color.
 - Achievements: plain `text-sm` names, no icons.
 - Personal: `font-heading` rows `books / my collection of books`, `movies / ...`, both link to `/favourites`. The old portfolio had no books or movies content.
 - Work with me: rows with a `size-9` rounded icon box (`bg-foreground/10`, round-stroke icon), bold title, muted `· description`. "Consultation" opens cal.com, "Hire me" is a `mailto:`.
-- Footer: `~ @rushbeef04`, GitHub, Twitter and LinkedIn icons, "Built with passion, assembled in India". The old portfolio's Twitter link (`twitter.com/rushbeef04`) is used here, it is not in the resume.
+- Footer: `~ @rushbeef04` on the left, "Built with passion, assembled in India" on the right. No social icons (removed).
 - Icons: React Icons, Feather set (`react-icons/fi`), through the `@astrojs/react` integration, rendered as static SVG (no client JS). Do not use Lucide. No background behind icons.
 - Achievements: a `FiAward` icon sits at the far right of each row.
 - Work with me icons: `FiPhoneCall`, `FiUsers`, muted `text-foreground/60`, no box.
@@ -132,3 +157,13 @@ All pages are empty for now: only the background color.
 
 - Work on a feature branch, commit small, then merge into `main` and push to GitHub (`origin`).
 - Follow every rule in this file. If you make a design decision, record it here before you finish.
+
+
+## Local CMS (Keystatic)
+
+- Config: `keystatic.config.tsx`. Storage is `local`: posts are saved as MDX files in `src/content/blog/`, pasted or dropped images in `public/images/posts/<slug>/`. No database, no cloud, no account.
+- Start it with `bun run dev`, then open `http://127.0.0.1:4321/keystatic`.
+- It is dev-only. `astro.config.mjs` adds the Keystatic integration only when the command is `astro dev`, and the dev server listens on `127.0.0.1` only. `astro build` output is plain static HTML with no `/keystatic` page and no API route. Do not remove the `isDev` check.
+- Post images must stay under `/images/posts/<slug>/`. Keystatic only shows images from that folder and escapes any other image path when you save.
+- Thumbnail is a plain path field: put the file in `public/images/blogs/` and type `/images/blogs/<file>`.
+- Saving in the CMS rewrites the file a little (YAML quoting, `*` bullets). The content stays the same.

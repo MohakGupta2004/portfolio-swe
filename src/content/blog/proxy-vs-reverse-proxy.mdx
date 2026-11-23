@@ -1,0 +1,110 @@
+---
+title: 'Proxy vs Reverse Proxy'
+description: 'What a proxy, a reverse proxy, a VPN and a load balancer each do, and where Kubernetes Ingress fits.'
+date: '2026-03-25'
+thumbnail: '/images/blogs/proxy-vs-reverse-proxy.jpg'
+---
+
+Proxy, reverse proxy, VPN and load balancer sound alike, and I mixed them up for a long time. They all sit between two machines. They differ in who they protect and what they do with your traffic. This post goes through each one and ends with how Kubernetes handles the same job.
+
+## What is a proxy?
+
+A proxy sits between you and the internet. Without one, your request goes straight to the website. With one, it takes a detour:
+
+```text
+You → Proxy → Internet → Server
+```
+
+The server sees the proxy's IP address and never sees yours. Think of asking a friend to buy something for you. The shopkeeper deals with your friend and never learns who you are.
+
+People use proxies for a few reasons:
+
+- To hide their IP address.
+- To control which sites a network can visit. Schools and offices do this.
+- To block sites. An ISP can block a site at the proxy.
+- To reach content that is restricted in their country.
+- To cache pages so repeat visits load faster.
+
+A concrete case: TikTok is banned in India. If your ISP blocks it, you cannot reach it directly. A proxy in another country can still fetch it for you, because the block applies to your connection and not to the proxy's.
+
+![proxy](/images/posts/proxy-vs-reverse-proxy/proxy.png)
+
+## What is a reverse proxy?
+
+A reverse proxy is also a middleman, but it works for the server. It hides the servers instead of the client.
+
+```text
+Client → Internet → Reverse proxy → Server
+```
+
+Picture an office receptionist. You tell them what you need, and they send you to the right person. You never learn which employee handled it.
+
+A reverse proxy gives you:
+
+- Hidden server details. Clients only see the proxy's address.
+- Routing, so `/api` goes to one service and `/` goes to another.
+- Load balancing across several servers.
+- Cached responses.
+- Some protection when traffic spikes.
+
+Nginx is the common example. It can spread traffic over several servers, cache responses and run a few balancing algorithms.
+
+The cost is that the reverse proxy becomes a single point of failure. If it goes down, everything behind it becomes unreachable. Teams run more than one for that reason.
+
+![reverse proxy](/images/posts/proxy-vs-reverse-proxy/reverse-proxy.png)
+
+## Proxy vs VPN
+
+Both hide your IP, so they look the same. The difference is encryption.
+
+A proxy forwards your request and nothing more. Your data is not encrypted, so anyone who can read your traffic can still read it.
+
+A VPN builds an encrypted tunnel between you and the VPN server. It hides your IP and also hides what you send.
+
+A proxy is a letter passed through a friend, who can read it. A VPN is a locked box only the receiver can open.
+
+Use a proxy for quick, low-stakes jobs like testing from another region. Use a VPN when privacy or security matters.
+
+![vpn tunnel](/images/posts/proxy-vs-reverse-proxy/vpn-tunnel.png)
+
+## Reverse proxy vs load balancer
+
+A load balancer spreads incoming traffic over several servers. Imagine a restaurant manager sending customers to different chefs so nobody drowns in orders.
+
+Nginx can do this, so a reverse proxy can act as a load balancer. The question is who handles the scaling.
+
+With Nginx:
+
+- It works well for small and medium setups.
+- You add and remove servers yourself.
+- Nothing scales automatically.
+
+With a cloud load balancer:
+
+- It spreads traffic and scales on its own.
+- It is easier to run when the system is large.
+- You manage less by hand.
+
+Large companies choose the cloud option because it scales on its own, stays up and needs little manual work.
+
+![cloud load balancer](/images/posts/proxy-vs-reverse-proxy/cloud-lb.png)
+
+![nginx load balancer](/images/posts/proxy-vs-reverse-proxy/nginx-lb.png)
+
+## Kubernetes
+
+Kubernetes takes over most of this work. It scales services, routes traffic and balances load between them.
+
+For traffic coming from outside the cluster, it uses Ingress, a set of rules for how requests reach your services. An Ingress controller runs those rules, and it is often Nginx under the hood.
+
+So an Ingress setup is a reverse proxy plus automatic scaling, without you wiring it up by hand.
+
+## Summary
+
+- A proxy hides the client.
+- A reverse proxy hides the server.
+- A VPN encrypts your traffic and hides your IP.
+- A load balancer spreads traffic across servers.
+- Kubernetes automates the scaling and routing.
+
+Each one solves a different problem, so pick based on which problem you have.

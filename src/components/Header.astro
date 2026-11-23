@@ -21,10 +21,16 @@ function isActive(href: string) {
 
 <header>
 	<div class="flex flex-wrap items-center gap-4 px-6 py-6">
-		<img src="/pfp.jpeg" alt="Mohak Gupta" class="size-12 rounded-lg object-cover" />
-		<p class="font-heading text-2xl">
-			Mohak Gupta <span class="text-foreground/60">aka</span> <span class="italic">rushbeef04</span>
-		</p>
+		<a href="/" class="group flex items-center gap-4">
+			<img
+				src="/pfp.jpeg"
+				alt="Mohak Gupta"
+				class="size-12 rounded-lg object-cover motion-safe:transition-transform motion-safe:duration-200 group-hover:-rotate-6"
+			/>
+			<p class="font-heading text-2xl">
+				Mohak Gupta <span class="text-foreground/60">aka</span> <span class="italic">rushbeef04</span>
+			</p>
+		</a>
 		<div class="ml-auto">
 			<SocialLinks />
 		</div>
