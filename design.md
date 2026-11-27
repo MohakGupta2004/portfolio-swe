@@ -45,7 +45,7 @@ Two themes. Dark is the default. The choice is saved in `localStorage` under `th
 
 | Token | Dark | Light | Tailwind class | Use for |
 | --- | --- | --- | --- | --- |
-| `--color-background` | `#2e2e2e` | `#f5f5f3` | `bg-background` | Page background (set on `body`) |
+| `--color-background` | `#211f28` | `#f5f5f3` | `bg-background` | Page background (set on `body`) |
 | `--color-foreground` | `#ececec` | `#2e2e2e` | `text-foreground`, `border-foreground` | Text and lines (default text color on `body`) |
 | `--accent` | `#8fd3f4` | `#1d6fa5` | `var(--accent)` in page CSS | Active tab, bullets and highlighted diagram boxes on `/projects` |
 
@@ -85,9 +85,9 @@ Pages that are not built yet are empty: only the background color.
 
 - Component: `src/components/Summary.astro`, rendered under the header on the landing page.
 - Written in first person, plain and specific. Every fact comes from the resume (`~/Documents/resume/resume_general_swe.tex`). Do not invent facts (no hobbies, cities or employers that are not in the resume) and do not copy the resume summary word for word.
-- Structure: who I am and what I ship now, how I like to work (own tools: mredis, mcode), hackathon and security proof, then where to find me.
+- Structure: who I am and what I ship now, how I like to work (rebuilding tools: mredis, mcode), hackathon and security proof, then availability (full-time from July 2027) and where to find me.
 - The whole section is lowercase (`lowercase` class on the `<section>`). Body text is `font-sans`, `leading-relaxed`, paragraphs spaced with `space-y-4`.
-- Emphasis and links use the `.dotted` utility: a dotted underline (2px, offset 4px) in `global.css`, same style as the active nav link. Use it for key phrases (plain `<span>`) and for links (`<a>`). Do not use solid or wavy underlines anywhere. Landing page section titles (`h2`) are the one exception to the plain look: they use the `marker` utility, a highlighter-pen swipe in the accent color behind the word (`font-heading text-4xl`, bold).
+- Emphasis and links use the `.dotted` utility: a dotted underline (2px, offset 4px) in `global.css`, same style as the active nav link. Use it for key phrases (plain `<span>`) and for links (`<a>`). The one main phrase of the summary ("ship them to production") uses the `scribble` utility instead: the same hand-drawn accent stroke as the titles, inline and on one line. Do not use solid or wavy underlines anywhere. Landing page section titles (`h2`) are the one exception to the plain look: they use the `marker` utility, a hand-drawn pen underline in the accent color, stretched to the width of the word and drawn in on load (`font-heading text-4xl`, bold). The same underline is on page titles (`h1`), the project and work names, and blog post `h2`s. Wrapping blog post titles use `marker-inline` (a thin accent line under each line).
 - No arrows on links, except the "view all work →", "view all projects →" and "view all blogs →" links. External links are plain `.dotted` links: GitHub (`https://github.com/MohakGupta2004`), LinkedIn (`https://www.linkedin.com/in/mohak-gupta-007065294`). Email is a `mailto:` link. There is no X account in the resume, so do not add one.
 - The underline uses the current text color. There is no separate underline color variable.
 - In `.astro` markup, keep a link on the same line as the space before it, so line wrapping in the source does not remove the space.
