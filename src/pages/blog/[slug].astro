@@ -76,7 +76,7 @@ function formatDate(date: Date) {
 						<span class="min-w-0 truncate text-foreground/60">{entry.data.title}</span>
 					</div>
 
-					<h1 class="mt-10 font-heading text-5xl font-bold">{entry.data.title}</h1>
+					<h1 class="mt-10 font-heading text-5xl"><span class="marker-inline">{entry.data.title}</span></h1>
 					<p class="mt-2 font-mono text-xs text-foreground/60">{formatDate(entry.data.date)}</p>
 
 					<div class="post-body mt-8">
@@ -116,12 +116,26 @@ function formatDate(date: Date) {
 
 	/* Headings */
 	.post-body h2 {
+		position: relative;
+		width: fit-content;
 		margin-top: 3rem;
 		font-family: var(--font-heading);
 		font-size: 1.875rem;
 		line-height: 2.25rem;
 		font-weight: 700;
 		scroll-margin-top: 2rem;
+	}
+
+	/* Same hand-drawn underline as the marker utility in global.css. */
+	.post-body h2::after {
+		content: '';
+		position: absolute;
+		left: -1%;
+		width: 102%;
+		bottom: 0.02em;
+		height: 0.28em;
+		background: var(--accent);
+		mask: var(--scribble) no-repeat 0 0 / 100% 100%;
 	}
 
 	.post-body h3 {

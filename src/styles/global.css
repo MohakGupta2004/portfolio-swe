@@ -54,7 +54,7 @@
 
 /* Dark is the default. The light values apply when <html data-theme="light"> is set. */
 :root {
-  --background: #2e2e2e;
+  --background: #211f28;
   --foreground: #ececec;
   --accent: #8fd3f4;
 }
@@ -111,23 +111,75 @@
   }
 }
 
-/* Section titles on the landing page: a highlighter-pen swipe behind the word, like marking a notebook. */
+/* Hand-drawn pen stroke used under titles. It is a mask, so it takes the accent color in both themes.
+   preserveAspectRatio="none" stretches it to the width of the text; non-scaling-stroke keeps the line thickness. */
+:root {
+  --scribble: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M1 4 C 30 6, 60 2, 99 5' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+}
+
+@keyframes draw-scribble {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Titles: a hand-drawn accent underline as wide as the word, drawn left to right on load. */
 @utility marker {
   position: relative;
   display: inline-block;
-  isolation: isolate;
   font-weight: 700;
 
-  &::before {
+  &::after {
     content: "";
     position: absolute;
-    z-index: -1;
-    left: -0.2em;
-    right: -0.25em;
-    bottom: 0.08em;
-    height: 0.55em;
-    background: color-mix(in srgb, var(--accent) 55%, transparent);
-    border-radius: 3px 10px 4px 12px / 8px 4px 9px 5px;
-    transform: rotate(-1.2deg);
+    left: -1%;
+    width: 102%;
+    bottom: 0.02em;
+    height: 0.28em;
+    background: var(--accent);
+    mask: var(--scribble) no-repeat 0 0 / 100% 100%;
+    animation: draw-scribble 0.5s ease-out 0.2s both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+    }
+  }
+}
+
+/* Same idea for titles that can wrap onto several lines. Each line gets its own thin accent line. */
+@utility marker-inline {
+  font-weight: 700;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding-bottom: 0.08em;
+  background: linear-gradient(var(--accent), var(--accent)) no-repeat 0 100% / 100% 3px;
+}
+
+/* The same pen stroke under a key phrase inside body text. Stays on one line so the stroke is not split. */
+@utility scribble {
+  position: relative;
+  white-space: nowrap;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: -1%;
+    width: 102%;
+    bottom: -0.35em;
+    height: 0.4em;
+    background: var(--accent);
+    mask: var(--scribble) no-repeat 0 0 / 100% 100%;
+    animation: draw-scribble 0.5s ease-out 0.6s both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+    }
   }
 }

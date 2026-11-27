@@ -1,0 +1,21 @@
+---
+// Pixel art banner at the top of the home page. Art by Karina Formanova.
+const artistName = 'Karina Formanova';
+---
+
+<section class="relative h-40 overflow-hidden sm:h-[220px]" aria-label="Banner">
+	<img
+		src="/banner.webp"
+		alt=""
+		width="1920"
+		height="1080"
+		decoding="async"
+		fetchpriority="high"
+		class="absolute inset-0 h-full w-full object-cover object-[center_75%] [image-rendering:pixelated]"
+	/>
+	<!-- Darken a little so the art does not fight the text, then fade into the page color. -->
+	<div class="pointer-events-none absolute inset-0 bg-black/15"></div>
+	<div class="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-background"></div>
+
+	<p class="absolute right-3 bottom-2 font-mono text-[10px] text-foreground/50">art: {artistName}</p>
+</section>
